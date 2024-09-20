@@ -89,9 +89,23 @@ export async function loginUser(req, res) {
       return res.status(401).json({ message: "Invalid username or password!" });
     }
 
-    
+    const payload = {
+      userId: user._id,
+      username: user.username,
+    };
 
-    res.status(200).json(user)
+    const token = jwt.sign(payload, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
+
+    res.cookie("agenda_token", token, {
+      sameSite: "strict",
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: 1000 * 60 * 60 * 24 * 7,
+    });
+
+    res.status(200).json({ message: "Login Successful" });
   } catch (error) {
     console.log("Error in loginUser controller: ", error);
     return res.status(500).json({ message: "Internal server error" });
