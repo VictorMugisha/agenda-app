@@ -68,3 +68,22 @@ export async function updateUser(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export async function deleteUser(req, res) {
+  try {
+    const { id: userId } = req.params;
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalide id provided" });
+    }
+
+    const user = await UserModel.findByIdAndDelete(userId);
+    if (!user) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    res.status(200).json({ message: "User deleted successfully!" });
+  } catch (error) {
+    console.log("Errors in deleteUser controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
