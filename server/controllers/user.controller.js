@@ -1,3 +1,4 @@
+import bcryptjs from "bcryptjs";
 import UserModel from "../models/user.model.js";
 
 export async function registerUser(req, res) {
@@ -43,13 +44,16 @@ export async function registerUser(req, res) {
         .json({ message: "Phone number must be 10 digits" });
     }
 
+    const salt = await bcryptjs.genSalt(10);
+    const hashedPassword = await bcryptjs.hash(password, salt);
+
     const newUser = new UserModel({
       firstName,
       lastName,
       email,
       username,
       phoneNumber,
-      password,
+      password: hashedPassword,
       isAdmin,
     });
 
