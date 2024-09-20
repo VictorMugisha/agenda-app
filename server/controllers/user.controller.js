@@ -1,69 +1,5 @@
-import bcryptjs from "bcryptjs";
+import mongoose from "mongoose";
 import UserModel from "../models/user.model.js";
-
-export async function registerUser(req, res) {
-  try {
-    const {
-      firstName,
-      lastName,
-      email,
-      username,
-      phoneNumber,
-      password,
-      confirmPassword,
-      isAdmin,
-    } = req.body;
-
-    if (
-      !firstName ||
-      !lastName ||
-      !email ||
-      !username ||
-      !phoneNumber ||
-      !password ||
-      !confirmPassword
-    ) {
-      return res.status(400).json({ message: "All fields are required" });
-    }
-
-    if (password !== confirmPassword) {
-      return res.status(400).json({ message: "Passwords do not match" });
-    }
-
-    const user = await UserModel.findOne({
-      $or: [{ email: email }, { username: username }],
-    });
-
-    if (user) {
-      return res.status(400).json({ message: "User already exists" });
-    }
-
-    if (phoneNumber.length !== 10) {
-      return res
-        .status(400)
-        .json({ message: "Phone number must be 10 digits" });
-    }
-
-    const salt = await bcryptjs.genSalt(10);
-    const hashedPassword = await bcryptjs.hash(password, salt);
-
-    const newUser = new UserModel({
-      firstName,
-      lastName,
-      email,
-      username,
-      phoneNumber,
-      password: hashedPassword,
-      isAdmin,
-    });
-
-    await newUser.save();
-    res.status(201).json(newUser);
-  } catch (error) {
-    console.log("Error in registerUser controller: ", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-}
 
 export async function getAllUsers(req, res) {
   try {
@@ -71,6 +7,25 @@ export async function getAllUsers(req, res) {
     res.status(200).json(users);
   } catch (error) {
     console.log("Error in getAllUsers controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function getSingleUser(req, res) {
+  try {
+    const { id: userId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(userId) || !userId) {
+      return res.status(404).json({ message: "Invalid id" });
+    }
+
+    const user = await UserModel.findById(userId).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "No user found" });
+    }
+
+    res.status(200).json(user);
+  } catch (error) {
+    console.log("Error in getSingleUser controller: ", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 }
