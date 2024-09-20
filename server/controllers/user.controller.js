@@ -29,3 +29,42 @@ export async function getSingleUser(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export async function updateUser(req, res) {
+  try {
+    const { id: userId } = req.params;
+    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
+      return res.status(400).json({ message: "Invalid id provided" });
+    }
+
+    const { firstName, lastName, username, email, phoneNumber } = req.body;
+    if (!firstName || !lastName || !username || !email || !phoneNumber) {
+      return res.status(401).json({ message: "All fields are required" });
+    }
+
+    const newUser = await UserModel.findByIdAndUpdate(
+      userId,
+      {
+        firstName,
+        lastName,
+        username,
+        email,
+        phoneNumber,
+      },
+      {
+        new: true,
+        runValidators: true,
+        upsert: false,
+      }
+    ).select("-password");
+
+    if (!newUser) {
+      return res.status(404).json({ message: "User not found!" });
+    }
+
+    res.status(200).json(newUser);
+  } catch (error) {
+    console.log("Error in updateUser controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
