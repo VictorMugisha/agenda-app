@@ -64,3 +64,13 @@ export async function registerUser(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export async function getAllUsers(req, res) {
+  try {
+    const users = await UserModel.find().select("-password");
+    res.status(200).json(users);
+  } catch (error) {
+    console.log("Error in getAllUsers controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
