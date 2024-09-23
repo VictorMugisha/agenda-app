@@ -28,9 +28,20 @@ const userSchema = new mongoose.Schema(
       type: String,
       required: true,
     },
-    isAdmin: {
-      type: Boolean,
-      default: false,
+    profilePicture: {
+      type: String,
+      default:
+        "https://res.cloudinary.com/victormugisha/image/upload/v1727106112/xreaonjemzjchk0zxmn2.jpg",
+    },
+    groupsJoined: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Group",
+      default: [],
+    },
+    groupsCreated: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "Group",
+      default: [],
     },
   },
   { timestamps: true }

@@ -1,167 +1,141 @@
-import { useState } from "react";
+import { useState, ChangeEvent, FormEvent } from "react";
 
-interface FomFieldsDara {
+interface FormData {
   firstName: string;
   lastName: string;
-  username: string;
   email: string;
+  username: string;
   phoneNumber: string;
+  password: string;
+  confirmPassword: string;
+  profilePicture: File | null;
 }
+
 export default function Register() {
-  const [formData, setFormData] = useState<FomFieldsDara>({
+  const [formData, setFormData] = useState<FormData>({
     firstName: "",
     lastName: "",
-    username: "",
     email: "",
+    username: "",
     phoneNumber: "",
+    password: "",
+    confirmPassword: "",
+    profilePicture: null,
   });
 
-  const [formErrors, setFormErrors] = useState<FomFieldsDara>({
-    firstName: "",
-    lastName: "",
-    username: "",
-    email: "",
-    phoneNumber: "",
-  });
-  function handleChange(e: React.ChangeEvent<HTMLInputElement>) {
+  const handleChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
+    setFormData({ ...formData, [name]: value });
+  };
 
-    setFormData((prevFormData) => ({
-      ...prevFormData,
-      [name]: value,
-    }));
-
-    setFormErrors((prevFormErrors) => ({
-      ...prevFormErrors,
-      [name]: "",
-    }));
-  }
-
-  function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    if (!formData.firstName) {
-      setFormErrors((prevFormErrors) => ({
-        ...prevFormErrors,
-        firstName: "First name is required",
-      }));
+  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      const formImage = new FormData()
+      formImage.append('image', e.target.files[0])
+      console.log("This is form image: ", formImage.get('image'))
     }
+  };
 
-    if (!formData.lastName) {
-      setFormErrors((prevFormErrors) => ({
-        ...prevFormErrors,
-        lastName: "Last name is required",
-      }));
-    }
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
 
-    if (!formData.username) {
-      setFormErrors((prevFormErrors) => ({
-        ...prevFormErrors,
-        username: "Username is required",
-      }));
+    try {
+      console.log("Form Data: ", formData);
+      const response = await fetch("http://localhost:8000/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(formData),
+      });
+      const data = await response.json();
+      console.log(data);
+    } catch (error) {
+      console.error("Error:", error);
     }
-
-    if (!formData.email) {
-      setFormErrors((prevFormErrors) => ({
-        ...prevFormErrors,
-        email: "Email is required",
-      }));
-    }
-
-    if (!formData.phoneNumber) {
-      setFormErrors((prevFormErrors) => ({
-        ...prevFormErrors,
-        phoneNumber: "Phone number is required",
-      }));
-    }
-  }
+  };
 
   return (
-    <main className="w-full px-6 mt-5 flex flex-col items-center">
-      <h1 className="text-3xl font-semibold pt-4 pb-9">Register</h1>
-      <form className="w-full flex flex-col gap-4" onSubmit={handleSubmit}>
-        <div>
-          <input
-            type="text"
-            name="firstName"
-            placeholder="First Name"
-            className="h-11 w-full px-3 text-lg outline-none border-2 focus:border-2 rounded-lg focus:border-gray-300 transition-all"
-            value={formData.firstName}
-            onChange={handleChange}
-          />
-          {formErrors.firstName && (
-            <span className="text-sm italic text-red-400 px-3 w-full font-semibold">
-              {formErrors.firstName}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <input
-            type="text"
-            name="lastName"
-            placeholder="Last Name"
-            className="h-11 w-full px-3 text-lg outline-none border-2 focus:border-2 rounded-lg focus:border-gray-300 transition-all"
-            value={formData.lastName}
-            onChange={handleChange}
-          />
-          {formErrors.lastName && (
-            <span className="text-sm italic text-red-400 px-3 w-full font-semibold">
-              {formErrors.lastName}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <input
-            type="text"
-            name="username"
-            placeholder="Username"
-            className="h-11 w-full px-3 text-lg outline-none border-2 focus:border-2 rounded-lg focus:border-gray-300 transition-all"
-            value={formData.username}
-            onChange={handleChange}
-          />
-          {formErrors.username && (
-            <span className="text-sm italic text-red-400 px-3 w-full font-semibold">
-              {formErrors.username}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <input
-            type="email"
-            name="email"
-            placeholder="Email"
-            className="h-11 w-full px-3 text-lg outline-none border-2 focus:border-2 rounded-lg focus:border-gray-300 transition-all"
-            value={formData.email}
-            onChange={handleChange}
-          />
-          {formErrors.email && (
-            <span className="text-sm italic text-red-400 px-3 w-full font-semibold">
-              {formErrors.email}
-            </span>
-          )}
-        </div>
-
-        <div>
-          <input
-            type="text"
-            name="phoneNumber"
-            placeholder="Phone Number"
-            className="h-11 w-full px-3 text-lg outline-none border-2 focus:border-2 rounded-lg focus:border-gray-300 transition-all"
-            value={formData.phoneNumber}
-            onChange={handleChange}
-          />
-          {formErrors.phoneNumber && (
-            <span className="text-sm italic text-red-400 px-3 w-full font-semibold">
-              {formErrors.phoneNumber}
-            </span>
-          )}
-        </div>
-
-        <button className="btn btn-success text-white  text-xl">Send</button>
+    <div className="max-w-md mx-auto p-6 border border-gray-300 rounded-lg shadow-lg">
+      <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
+      <form onSubmit={handleSubmit} encType="multipart/form-data">
+        <input
+          type="text"
+          name="firstName"
+          placeholder="First Name"
+          value={formData.firstName}
+          onChange={handleChange}
+          className="mb-4 p-2 border border-gray-300 rounded w-full"
+          required
+        />
+        <input
+          type="text"
+          name="lastName"
+          placeholder="Last Name"
+          value={formData.lastName}
+          onChange={handleChange}
+          className="mb-4 p-2 border border-gray-300 rounded w-full"
+          required
+        />
+        <input
+          type="email"
+          name="email"
+          placeholder="Email"
+          value={formData.email}
+          onChange={handleChange}
+          className="mb-4 p-2 border border-gray-300 rounded w-full"
+          required
+        />
+        <input
+          type="text"
+          name="username"
+          placeholder="Username"
+          value={formData.username}
+          onChange={handleChange}
+          className="mb-4 p-2 border border-gray-300 rounded w-full"
+          required
+        />
+        <input
+          type="text"
+          name="phoneNumber"
+          placeholder="Phone Number"
+          value={formData.phoneNumber}
+          onChange={handleChange}
+          className="mb-4 p-2 border border-gray-300 rounded w-full"
+          required
+        />
+        <input
+          type="password"
+          name="password"
+          placeholder="Password"
+          value={formData.password}
+          onChange={handleChange}
+          className="mb-4 p-2 border border-gray-300 rounded w-full"
+          required
+        />
+        <input
+          type="password"
+          name="confirmPassword"
+          placeholder="Confirm Password"
+          value={formData.confirmPassword}
+          onChange={handleChange}
+          className="mb-4 p-2 border border-gray-300 rounded w-full"
+          required
+        />
+        <input
+          type="file"
+          name="profilePicture"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="mb-4"
+        />
+        <button
+          type="submit"
+          className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+        >
+          Register
+        </button>
       </form>
-    </main>
+    </div>
   );
 }

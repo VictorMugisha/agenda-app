@@ -12,7 +12,6 @@ export async function registerUser(req, res) {
       phoneNumber,
       password,
       confirmPassword,
-      isAdmin,
     } = req.body;
 
     if (
@@ -48,6 +47,8 @@ export async function registerUser(req, res) {
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
 
+
+
     const newUser = new UserModel({
       firstName,
       lastName,
@@ -55,10 +56,11 @@ export async function registerUser(req, res) {
       username,
       phoneNumber,
       password: hashedPassword,
-      isAdmin,
     });
 
-    await newUser.save();
+    console.log("new user to be saved: ", newUser)
+
+    // await newUser.save();
     res.status(201).json(newUser);
   } catch (error) {
     console.log("Error in registerUser controller: ", error);
