@@ -8,7 +8,7 @@ interface FormData {
   phoneNumber: string;
   password: string;
   confirmPassword: string;
-  profilePicture: File | null;
+  profilePicture: string | null;
 }
 
 export default function Register() {
@@ -28,11 +28,29 @@ export default function Register() {
     setFormData({ ...formData, [name]: value });
   };
 
-  const handleFileChange = (e: ChangeEvent<HTMLInputElement>) => {
+  function handleFileChange(e: ChangeEvent<HTMLInputElement>) {
     if (e.target.files && e.target.files.length > 0) {
-      const formImage = new FormData()
-      formImage.append('image', e.target.files[0])
-      console.log("This is form image: ", formImage.get('image'))
+      const file = e.target.files[0];
+      const imageData = new FormData();
+      imageData.append("file", file);
+      imageData.append("upload_preset", "agenda_app");
+      imageData.append("cloud_name", "victormugisha");
+
+      fetch("https://api.cloudinary.com/v1_1/victormugisha/image/upload", {
+        method: "post",
+        body: imageData,
+      })
+        .then((res) => res.json())
+        .then((data) => {
+          console.log("Data from cloudinary: ", data);
+          setFormData((prevData) => ({
+            ...prevData,
+            profilePicture: data.url,
+          }));
+        })
+        .catch((err) => {
+          console.log("Error uploading image: ", err);
+        });
     }
   };
 
