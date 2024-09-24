@@ -13,6 +13,8 @@ export default function Register() {
   });
 
   const [profileImage, setProfileImage] = useState(null);
+  const [uploadingImage, setUploadingImage] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -23,38 +25,22 @@ export default function Register() {
     setProfileImage(e.target.files[0]);
   }
 
-//   function saveImage(image) {
-//     if (image) {
-//       const fileData = new FormData();
-//       fileData.append("file", image);
-//       fileData.append("cloud_name", "victormugisha");
-//       fileData.append("upload_preset", "agenda_app");
-
-//       fetch("https://api.cloudinary.com/v1_1/victormugisha/image/upload", {
-//         method: "post",
-//         body: fileData,
-//       })
-//         .then((res) => res.json())
-//         .then((data) => {
-//           console.log("Image uploaded: ", data);
-//           setFormData((prevData) => ({
-//             ...prevData,
-//             profilePicture: data.url,
-//           }));
-
-//           console.log("Form Submitted:", formData);
-//         })
-//         .catch((err) => {
-//           console.log("Error while uploading image: ", err);
-//         });
-//     }
-//   }
-
   const handleSubmit = async (e) => {
     e.preventDefault();
 
+    // Password match validation
+    if (formData.password !== formData.confirmPassword) {
+      setErrorMessage("Passwords do not match.");
+      return;
+    }
+
     try {
+      let profileImageUrl = null; // Default is null, so it can be used for the default image
+
       if (profileImage) {
+        // Start uploading the image
+        setUploadingImage(true);
+
         const fileData = new FormData();
         fileData.append("file", profileImage);
         fileData.append("cloud_name", "victormugisha");
@@ -63,42 +49,52 @@ export default function Register() {
         const res = await fetch(
           "https://api.cloudinary.com/v1_1/victormugisha/image/upload",
           {
-            method: "post",
+            method: "POST",
             body: fileData,
           }
         );
 
         const data = await res.json();
+        profileImageUrl = data.url;
 
-        console.log("Image uploaded: ", data);
-        setFormData((prevData) => ({
-          ...prevData,
-          profilePicture: data.url,
-        }));
+        setUploadingImage(false);
       }
-    } catch (error) {
-      console.log("Error while uploading image: ", error);
-    }
 
-    // try {
-    //   console.log("Form Data: ", formData);
-    //   const response = await fetch("http://localhost:8000/auth/register", {
-    //     method: "POST",
-    //     headers: {
-    //       "Content-Type": "application/json",
-    //     },
-    //     body: JSON.stringify(formData),
-    //   });
-    //   const data = await response.json();
-    //   console.log(data);
-    // } catch (error) {
-    //   console.error("Error:", error);
-    // }
+      // Prepare form data for submission
+      const finalFormData = {
+        ...formData,
+        profilePicture: profileImageUrl, // Set the uploaded image URL or null
+      };
+
+      // Submit form data to backend
+      const response = await fetch("http://localhost:8000/auth/register", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(finalFormData),
+      });
+
+      const result = await response.json();
+      console.log(result);
+
+      // Handle backend response
+      if (!response.ok) {
+        throw new Error(result.message || "Something went wrong!");
+      }
+      console.log("User registered successfully!");
+    } catch (error) {
+      console.error("Error:", error);
+      setUploadingImage(false);
+    }
   };
 
   return (
     <div className="max-w-md mx-auto p-6 border border-gray-300 rounded-lg shadow-lg">
       <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
+      {errorMessage && (
+        <p className="text-red-500 text-center mb-4">{errorMessage}</p>
+      )}
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <input
           type="text"
@@ -170,9 +166,13 @@ export default function Register() {
           onChange={handleFileChange}
           className="mb-4"
         />
+        {uploadingImage && (
+          <p className="text-center text-blue-500 mb-4">Uploading image...</p>
+        )}
         <button
           type="submit"
           className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+          disabled={uploadingImage}
         >
           Register
         </button>
