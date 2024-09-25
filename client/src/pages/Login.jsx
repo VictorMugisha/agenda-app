@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
+import { useToast } from "@chakra-ui/react";
 import { BACKEND_URL } from "../constants/constants";
 
 export default function Login() {
@@ -7,6 +8,9 @@ export default function Login() {
     username: "",
     password: "",
   });
+  const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
+  const toast = useToast()
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -27,15 +31,30 @@ export default function Login() {
       });
 
       const data = await response.json();
-      console.log("Login response:", data);
+      if (response.status !== 200) {
+        throw new Error(data.message);
+      }
+      
+      toast({
+        title: "Logged in Successfully!",
+        description: "Login Successful",
+        status: "success",
+        duration: 5000,
+        isClosable: true,
+      });
+
+      navigate("/app", { replace: true });
     } catch (error) {
-      console.error("Login error:", error);
+      setErrorMessage(error.message);
     }
   }
 
   return (
     <div className="max-w-md mx-auto p-6 border border-gray-300 rounded-lg shadow-lg mt-6">
       <h2 className="text-2xl font-bold text-center mb-6">Login</h2>
+      {errorMessage && (
+        <p className="text-red-500 text-center mb-4">{errorMessage}</p>
+      )}
       <form onSubmit={handleSubmit} encType="multipart/form-data">
         <input
           type="text"
