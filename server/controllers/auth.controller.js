@@ -112,6 +112,24 @@ export async function loginUser(req, res) {
   }
 }
 
+export async function verifyToken(req, res) {
+  try {
+    const token = req.cookies.agenda_token;
+    if (!token) {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+
+    const verified = jwt.verify(token, process.env.JWT_SECRET);
+    if (verified) {
+      return res.status(200).json({ message: "Token is valid" });
+    } else {
+      return res.status(401).json({ message: "Unauthorized" });
+    }
+  } catch (error) {
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
 export async function logoutUser(req, res) {
   try {
     res.clearCookie("agenda_token", {
