@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Link } from "react-router-dom";
 import { BACKEND_URL, CLOUD_NAME, UPLOAD_PRESET } from "../constants/constants";
 
 export default function Register() {
@@ -176,6 +177,13 @@ export default function Register() {
           Register
         </button>
       </form>
+
+      <p className="text-center mt-4">
+        Already have an account?{" "}
+        <Link to="/login" className="text-blue-500 hover:text-blue-700">
+          Login
+        </Link>
+      </p>
     </div>
   );
 }
