@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { BACKEND_URL, CLOUD_NAME, UPLOAD_PRESET } from "../constants/constants";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -28,23 +29,21 @@ export default function Register() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    // Password match validation
     if (formData.password !== formData.confirmPassword) {
       setErrorMessage("Passwords do not match.");
       return;
     }
 
     try {
-      let profileImageUrl = null; // Default is null, so it can be used for the default image
+      let profileImageUrl = null;
 
       if (profileImage) {
-        // Start uploading the image
         setUploadingImage(true);
 
         const fileData = new FormData();
         fileData.append("file", profileImage);
-        fileData.append("cloud_name", "victormugisha");
-        fileData.append("upload_preset", "agenda_app");
+        fileData.append("cloud_name", CLOUD_NAME);
+        fileData.append("upload_preset", UPLOAD_PRESET);
 
         const res = await fetch(
           "https://api.cloudinary.com/v1_1/victormugisha/image/upload",
@@ -63,11 +62,13 @@ export default function Register() {
       // Prepare form data for submission
       const finalFormData = {
         ...formData,
-        profilePicture: profileImageUrl, // Set the uploaded image URL or null
+        profilePicture: profileImageUrl,
       };
 
+      console.log("Final form data: ", finalFormData);
+
       // Submit form data to backend
-      const response = await fetch("http://localhost:8000/auth/register", {
+      const response = await fetch(`${BACKEND_URL}/auth/register`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
