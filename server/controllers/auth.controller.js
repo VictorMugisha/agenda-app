@@ -58,9 +58,7 @@ export async function registerUser(req, res) {
       password: hashedPassword,
     });
 
-    console.log("new user to be saved: ", newUser)
-
-    // await newUser.save();
+    await newUser.save();
     res.status(201).json(newUser);
   } catch (error) {
     console.log("Error in registerUser controller: ", error);

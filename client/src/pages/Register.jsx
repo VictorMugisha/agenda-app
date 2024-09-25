@@ -65,8 +65,6 @@ export default function Register() {
         profilePicture: profileImageUrl,
       };
 
-      console.log("Final form data: ", finalFormData);
-
       // Submit form data to backend
       const response = await fetch(`${BACKEND_URL}/auth/register`, {
         method: "POST",
@@ -91,7 +89,7 @@ export default function Register() {
   };
 
   return (
-    <div className="max-w-md mx-auto p-6 border border-gray-300 rounded-lg shadow-lg">
+    <div className="max-w-md mx-auto p-6 border border-gray-300 rounded-lg shadow-lg mt-6">
       <h2 className="text-2xl font-bold text-center mb-6">Register</h2>
       {errorMessage && (
         <p className="text-red-500 text-center mb-4">{errorMessage}</p>
