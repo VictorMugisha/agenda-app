@@ -1,9 +1,7 @@
-import { Outlet } from "react-router-dom";
+import { Outlet, Navigate } from "react-router-dom";
+import useAuthContext from "../hooks/useAuthContext";
 export default function AppLayout() {
-  return (
-    <div>
-      <h2>Protected Route</h2>
-      <Outlet />
-    </div>
-  );
+  const { isAuthenticated } = useAuthContext();
+  
+  return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
 }

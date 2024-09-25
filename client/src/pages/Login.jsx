@@ -1,7 +1,6 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { useToast } from "@chakra-ui/react";
-import { BACKEND_URL } from "../constants/constants";
+import { Link } from "react-router-dom";
+import useLogin from "../hooks/useLogin";
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -9,8 +8,7 @@ export default function Login() {
     password: "",
   });
   const [errorMessage, setErrorMessage] = useState("");
-  const navigate = useNavigate();
-  const toast = useToast()
+  const { loading, login } = useLogin();
 
   function handleChange(e) {
     const { name, value } = e.target;
@@ -19,31 +17,8 @@ export default function Login() {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    console.log("Submitting form data:", formData);
-
     try {
-      const response = await fetch(`${BACKEND_URL}/auth/login`, {
-        method: "post",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(formData),
-      });
-
-      const data = await response.json();
-      if (response.status !== 200) {
-        throw new Error(data.message);
-      }
-      
-      toast({
-        title: "Logged in Successfully!",
-        description: "Login Successful",
-        status: "success",
-        duration: 5000,
-        isClosable: true,
-      });
-
-      navigate("/app", { replace: true });
+      await login(formData.username, formData.password);
     } catch (error) {
       setErrorMessage(error.message);
     }
@@ -77,8 +52,9 @@ export default function Login() {
         <button
           type="submit"
           className="w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
+          disabled={loading}
         >
-          Register
+          {loading ? "Processing..." : "Login"}
         </button>
       </form>
 
