@@ -12,6 +12,7 @@ export async function registerUser(req, res) {
       phoneNumber,
       password,
       confirmPassword,
+      profilePicture,
     } = req.body;
 
     console.log('Submitted User Data: ', req.body);
@@ -58,6 +59,7 @@ export async function registerUser(req, res) {
       username,
       phoneNumber,
       password: hashedPassword,
+      profilePicture,
     });
 
     await newUser.save();
