@@ -34,6 +34,7 @@ export default function useLogin() {
       });
 
       setIsAuthenticated(true);
+      localStorage.setItem('agenda_token', data.token);
       navigate("/app", { replace: true });
     } catch (error) {
       throw new Error(error.message)

@@ -6,7 +6,7 @@ import Register from "./pages/Register.jsx";
 import Login from "./pages/Login.jsx";
 import "./index.css";
 
-import AppLayout from "./layouts/AppLayout.jsx";
+import ProtectedRoute from "./layouts/ProtectedRoute.jsx";
 import HomePage from "./pages/protected/HomePage.jsx";
 
 import { ChakraProvider } from "@chakra-ui/react";
@@ -21,7 +21,7 @@ createRoot(document.getElementById("root")).render(
             <Route path="/" element={<App />} />
             <Route path="register" element={<Register />} />
             <Route path="login" element={<Login />} />
-            <Route path="/app" element={<AppLayout />}>
+            <Route path="/app" element={<ProtectedRoute />}>
               <Route path="" element={<HomePage />} />
             </Route>
             <Route path="*" element={<h1>Not Found</h1>} />
