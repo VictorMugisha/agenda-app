@@ -3,7 +3,7 @@ import UserModel from "../models/user.model.js";
 
 export default async function protectedRoute(req, res, next) {
   try {
-    const token = req.cookies.agenda_token;
+    const token = req.headers.authorization;
     if (!token) {
       return res
         .status(401)

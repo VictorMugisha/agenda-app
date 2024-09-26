@@ -14,6 +14,8 @@ export async function registerUser(req, res) {
       confirmPassword,
     } = req.body;
 
+    console.log('Submitted User Data: ', req.body);
+
     if (
       !firstName ||
       !lastName ||
@@ -105,7 +107,7 @@ export async function loginUser(req, res) {
       maxAge: 1000 * 60 * 60 * 24 * 7,
     });
 
-    res.status(200).json({ message: "Login Successful" });
+    res.status(200).json({ message: "Login Successful", token });
   } catch (error) {
     console.log("Error in loginUser controller: ", error);
     return res.status(500).json({ message: "Internal server error" });
