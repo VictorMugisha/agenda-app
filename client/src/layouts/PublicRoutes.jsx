@@ -3,5 +3,11 @@ import useAuthContext from "../hooks/useAuthContext";
 export default function PublicRoutes() {
   const { isAuthenticated } = useAuthContext();
   
-  return isAuthenticated ? <Navigate to="/app" replace /> : <Outlet />;
+  return isAuthenticated ? (
+    <Navigate to="/app" replace />
+  ) : (
+    <main className="flex flex-col min-h-screen justify-center mx-5">
+      <Outlet />
+    </main>
+  );
 }

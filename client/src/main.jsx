@@ -15,6 +15,7 @@ import AuthContextProvider from "./context/AuthContext.jsx";
 import PublicRoutes from "./layouts/PublicRoutes.jsx";
 import MyGroups from "./pages/protected/MyGroups.jsx";
 import Profile from "./pages/protected/Profile.jsx";
+import Notifications from "./pages/protected/Notifications.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -29,7 +30,7 @@ createRoot(document.getElementById("root")).render(
             </Route>
             <Route path="/app" element={<ProtectedRoute />}>
               <Route path="" element={<HomePage />} />
-              <Route path="notifications" element={<MyGroups />} />
+              <Route path="notifications" element={<Notifications />} />
               <Route path="mygroups" element={<MyGroups />} />
               <Route path="profile" element={<Profile />} />
             </Route>
