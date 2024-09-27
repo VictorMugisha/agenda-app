@@ -156,3 +156,101 @@ export async function updateGroup(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export async function deleteGroup(req, res) {
+  try {
+    const { id } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(id)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+
+    const group = await GroupModel.findById(id);
+    if (!group) {
+      return res.status(400).json({ message: "Group doesn't exist" });
+    }
+
+    if (group.admin.toString() !== req.loggedInUser._id.toString()) {
+      return res.status(401).json({ message: "You cannot delete this group" });
+    }
+
+    await GroupModel.findByIdAndDelete(id);
+    res.status(200).json({ message: "Group deleted successfully!" });
+  } catch (error) {
+    console.log("Error in deleteGroup controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function joinGroup(req, res) {
+  try {
+    const { id: groupId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+
+    const group = await GroupModel.findById(groupId);
+    if (!group) {
+      return res.status(400).json({ message: "Group doesn't exist" });
+    }
+
+    if (group.members.includes(req.loggedInUser._id)) {
+      return res
+        .status(400)
+        .json({ message: "You are already a member of this group" });
+    }
+
+    const { password } = req.body;
+    const isMatch = await bcryptjs.compare(password, group.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Incorrect password" });
+    }
+
+    const updatedGroup = await GroupModel.findByIdAndUpdate(
+      groupId,
+      { $push: { members: req.loggedInUser._id } },
+      { new: true, runValidators: true, upsert: false }
+    ).select("-password");
+
+    res.status(200).json(updatedGroup);
+  } catch (error) {
+    console.log("Error in joinGroup controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function leaveGroup(req, res) {
+  try {
+    const { id: groupId } = req.params;
+    if (!mongoose.Types.ObjectId.isValid(groupId)) {
+      return res.status(400).json({ message: "Invalid id" });
+    }
+
+    const group = await GroupModel.findById(groupId);
+    if (!group) {
+      return res.status(400).json({ message: "Group doesn't exist" });
+    }
+
+    if (!group.members.includes(req.loggedInUser._id)) {
+      return res
+        .status(400)
+        .json({ message: "You are not a member of this group" });
+    }
+
+    if (group.admin.toString() === req.loggedInUser._id.toString()) {
+      return res
+        .status(400)
+        .json({ message: "You cannot leave the group as the admin" });
+    }
+
+    const updatedGroup = await GroupModel.findByIdAndUpdate(
+      groupId,
+      { $pull: { members: req.loggedInUser._id } },
+      { new: true, runValidators: true, upsert: false }
+    ).select("-password");
+
+    res.status(200).json({ message: "You left the group successfully!" });
+  } catch (error) {
+    console.log("Error in leaveGroup controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
