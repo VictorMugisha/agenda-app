@@ -15,7 +15,7 @@ export async function registerUser(req, res) {
       profilePicture,
     } = req.body;
 
-    console.log('Submitted User Data: ', req.body);
+    console.log("Submitted User Data: ", req.body);
 
     if (
       !firstName ||
@@ -61,7 +61,9 @@ export async function registerUser(req, res) {
     });
 
     await newUser.save();
-    res.status(201).json(newUser);
+
+    const savedUser = await UserModel.findById(newUser._id).select("-password");
+    res.status(201).json(savedUser);
   } catch (error) {
     console.log("Error in registerUser controller: ", error);
     return res.status(500).json({ message: "Internal server error" });

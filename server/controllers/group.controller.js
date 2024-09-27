@@ -4,7 +4,7 @@ import mongoose from "mongoose";
 
 export async function createGroup(req, res) {
   try {
-    const { name, password, confirmPassword } = req.body;
+    const { name, description, coverImg, password, confirmPassword } = req.body;
     const admin = req.loggedInUser;
 
     if (!name || !password || !confirmPassword) {
@@ -23,15 +23,24 @@ export async function createGroup(req, res) {
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
 
-    const newGroup = new GroupModel({
-      name,
-      password: hashedPassword,
-      admin: admin._id,
-      members: [admin._id],
-    });
+    const fields = {};
+
+    if (description) fields.description = description;
+    if (coverImg) fields.coverImg = coverImg;
+
+    fields.admin = admin._id;
+    fields.members = [admin._id];
+    fields.name = name;
+    fields.password = hashedPassword;
+
+    const newGroup = new GroupModel(fields);
 
     await newGroup.save();
-    res.status(201).json(newGroup);
+
+    const savedGroup = await GroupModel.findById(newGroup._id).select(
+      "-password"
+    );
+    res.status(201).json(savedGroup);
   } catch (error) {
     console.log("Error in createGroup controller: ", error);
     return res.status(500).json({ message: "Internal server error" });
