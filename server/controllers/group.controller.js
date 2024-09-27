@@ -55,3 +55,19 @@ export async function getMyGroups(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export async function getSingleGroup(req, res) {
+  try {
+    const { id } = req.params;
+    const group = await GroupModel.findById(id).select("-password");
+
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    res.status(200).json(group);
+  } catch (error) {
+    console.log("Error in getSingleGroup controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
