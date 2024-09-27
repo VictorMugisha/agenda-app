@@ -1,14 +1,14 @@
 import { useToast } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
 import { BACKEND_URL } from "../constants/constants";
-import useAuthContext from "./useAuthContext";
 import { useState } from "react";
+import useAuthContext from "./useAuthContext";
 
 export default function useLogin() {
   const navigate = useNavigate();
   const toast = useToast();
-  const { setIsAuthenticated } = useAuthContext();
   const [loading, setLoading] = useState(false);
+  const { setToken } = useAuthContext()
   async function login(username, password) {
     try {
       setLoading(true);
@@ -33,8 +33,7 @@ export default function useLogin() {
         isClosable: true,
       });
 
-      setIsAuthenticated(true);
-      localStorage.setItem('agenda_token', data.token);
+      setToken(data.token)
       navigate("/app", { replace: true });
     } catch (error) {
       throw new Error(error.message)

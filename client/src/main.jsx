@@ -11,6 +11,7 @@ import HomePage from "./pages/protected/HomePage.jsx";
 
 import { ChakraProvider } from "@chakra-ui/react";
 import AuthContextProvider from "./context/AuthContext.jsx";
+import PublicRoutes from "./layouts/PublicRoutes.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -18,9 +19,11 @@ createRoot(document.getElementById("root")).render(
       <AuthContextProvider>
         <ChakraProvider>
           <Routes>
-            <Route path="/" element={<App />} />
-            <Route path="register" element={<Register />} />
-            <Route path="login" element={<Login />} />
+            <Route path="/" element={<PublicRoutes />}>
+              <Route index element={<App />} />
+              <Route path="register" element={<Register />} />
+              <Route path="login" element={<Login />} />
+            </Route>
             <Route path="/app" element={<ProtectedRoute />}>
               <Route path="" element={<HomePage />} />
             </Route>
