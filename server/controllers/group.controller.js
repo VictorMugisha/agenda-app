@@ -76,7 +76,14 @@ export async function getSingleGroup(req, res) {
 export async function updateGroup(req, res) {
   try {
     const { id } = req.params;
-    const { name, password, confirmPassword, description, coverImg } = req.body;
+    const {
+      name,
+      currentPassword,
+      newPassword,
+      confirmNewPassword,
+      description,
+      coverImg,
+    } = req.body;
     const admin = req.loggedInUser;
 
     if (!mongoose.Types.ObjectId.isValid(id)) {
@@ -95,16 +102,33 @@ export async function updateGroup(req, res) {
     const updates = {};
 
     if (name) updates.name = name;
-    if (password) {
-      if (password !== confirmPassword) {
-        return res.status(400).json({ message: "Passwords do not match" });
-      }
-      const salt = await bcryptjs.genSalt(10);
-      const hashedPassword = await bcryptjs.hash(password, salt);
-      updates.password = hashedPassword;
-    }
     if (description) updates.description = description;
     if (coverImg) updates.coverImg = coverImg;
+
+    if (currentPassword || newPassword || confirmNewPassword) {
+      if (!currentPassword || !newPassword || !confirmNewPassword) {
+        return res.status(400).json({ message: "Provide all password fields" });
+      }
+
+      const isMatch = await bcryptjs.compare(currentPassword, group.password);
+      if (!isMatch) {
+        return res
+          .status(400)
+          .json({ message: "Current password is incorrect" });
+      }
+
+      if (newPassword !== confirmNewPassword) {
+        return res.status(400).json({ message: "Passwords do not match" });
+      }
+
+      const salt = await bcrypt.genSalt(10);
+      const hashedPassword = await bcrypt.hash(newPassword, salt);
+      updates.password = hashedPassword;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: "No fields to update!" });
+    }
 
     const updatedGroup = await GroupModel.findByIdAndUpdate(
       id,
@@ -114,7 +138,7 @@ export async function updateGroup(req, res) {
         runValidators: true,
         upsert: false,
       }
-    );
+    ).select("-password");
 
     res.status(200).json(updatedGroup);
   } catch (error) {
