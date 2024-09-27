@@ -1,6 +1,10 @@
-
+import useAuthContext from "../../hooks/useAuthContext";
 export default function HomePage() {
+  const { removeToken } = useAuthContext();
   return (
-    <div>HomePage</div>
-  )
+    <div>
+      <p>HomePage</p>
+      <button className="btn btn-primary" onClick={() => removeToken()}>Logout</button>
+    </div>
+  );
 }
