@@ -35,3 +35,23 @@ export async function createGroup(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export async function getAllGroups(req, res) {
+  try {
+    const allGroups = await GroupModel.find().select("-password");
+    res.status(200).json(allGroups);
+  } catch (error) {
+    console.log("Error in getAllGroups controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function getMyGroups(req, res) {
+  try {
+    const myGroups = await GroupModel.find({ admin: req.loggedInUser._id });
+    res.status(200).json(myGroups);
+  } catch (error) {
+    console.log("Error in getMyGroups controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
