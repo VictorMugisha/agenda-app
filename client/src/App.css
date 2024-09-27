@@ -26,3 +26,14 @@
   background: rgba(208, 74, 74, 0.48);
   color: rgba(255, 255, 255, 0.904);
 }
+
+/* App secondary button */
+.app-secondary-btn {
+  background: rgba(163, 160, 160, 0.436);
+  color: rgba(71, 162, 59, 0.904);
+}
+
+.app-secondary-btn:hover {
+  background: rgba(210, 205, 205, 0.48);
+  color: rgba(71, 162, 59, 0.904);
+}

@@ -49,7 +49,16 @@ export async function createGroup(req, res) {
 
 export async function getAllGroups(req, res) {
   try {
-    const allGroups = await GroupModel.find().select("-password");
+    const allGroups = await GroupModel.find()
+      .select("-password")
+      .populate({
+        path: "admin",
+        select: "-password",
+      })
+      .populate({
+        path: "members",
+        select: "-password",
+      });
     res.status(200).json(allGroups);
   } catch (error) {
     console.log("Error in getAllGroups controller: ", error);
@@ -59,7 +68,9 @@ export async function getAllGroups(req, res) {
 
 export async function getMyGroups(req, res) {
   try {
-    const myGroups = await GroupModel.find({ admin: req.loggedInUser._id });
+    const myGroups = await GroupModel.find({ admin: req.loggedInUser._id })
+      .select("-password")
+      .populate("admin members");
     res.status(200).json(myGroups);
   } catch (error) {
     console.log("Error in getMyGroups controller: ", error);
@@ -70,7 +81,9 @@ export async function getMyGroups(req, res) {
 export async function getSingleGroup(req, res) {
   try {
     const { id } = req.params;
-    const group = await GroupModel.findById(id).select("-password");
+    const group = await GroupModel.findById(id)
+      .select("-password")
+      .populate("admin members");
 
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
