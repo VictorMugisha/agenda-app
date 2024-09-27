@@ -16,6 +16,7 @@ import PublicRoutes from "./layouts/PublicRoutes.jsx";
 import MyGroups from "./pages/protected/MyGroups.jsx";
 import Profile from "./pages/protected/Profile.jsx";
 import Notifications from "./pages/protected/Notifications.jsx";
+import GroupDetails from "./pages/protected/GroupDetails.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -32,6 +33,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="" element={<HomePage />} />
               <Route path="notifications" element={<Notifications />} />
               <Route path="mygroups" element={<MyGroups />} />
+              <Route path="group/:id" element={<GroupDetails />} />
               <Route path="profile" element={<Profile />} />
             </Route>
             <Route path="*" element={<h1>Not Found</h1>} />

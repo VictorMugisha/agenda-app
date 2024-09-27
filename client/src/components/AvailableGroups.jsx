@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import useGroups from "../hooks/useGroups";
+import { useAvailableGroups } from "../hooks/index";
 import GroupCard from "./GroupCard";
 import PropTypes from "prop-types";
 
 export default function AvailableGroups({ searchQuery }) {
-  const { groups, loading, error, availableGroups } = useGroups();
+  const { groups, loading, error, availableGroups } = useAvailableGroups();
 
   useEffect(() => {
     availableGroups();
@@ -20,11 +20,12 @@ export default function AvailableGroups({ searchQuery }) {
         <span className="loading loading-dots loading-lg"></span>
       </div>
     );
-  if (error) return (
-    <div className="text-center">
-      <p className="text-red-500">{error}</p>
-    </div>
-  );
+  if (error)
+    return (
+      <div className="text-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
 
   return (
     <div className="grid md:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto scrollbar-hide">

@@ -1,4 +1,5 @@
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 export default function GroupCard({ group }) {
   return (
@@ -10,7 +11,9 @@ export default function GroupCard({ group }) {
           Admin: <span className="font-semibold">{group.admin.firstName}</span>
         </h3>
         <div className="card-actions justify-end">
-          <button className="btn w-32 app-secondary-btn">View</button>
+          <Link to={`group/${group._id}`}>
+            <button className="btn w-32 app-secondary-btn">View</button>
+          </Link>
           <button className="btn w-32 app-primary-btn">Join</button>
         </div>
       </div>
@@ -23,7 +26,7 @@ GroupCard.propTypes = {
     _id: PropTypes.string.isRequired,
     createdAt: PropTypes.string,
     coverImg: PropTypes.string,
-    name: PropTypes.string.isRequired, 
+    name: PropTypes.string.isRequired,
     description: PropTypes.string.isRequired,
     admin: PropTypes.shape({
       firstName: PropTypes.string.isRequired,

@@ -79,6 +79,8 @@ export async function getMyGroups(req, res) {
 }
 
 export async function getSingleGroup(req, res) {
+  console.log("route is http://localhost:8000/groups/group/:id");
+  console.log('Backend getSingleGroup controller');
   try {
     const { id } = req.params;
     const group = await GroupModel.findById(id)
