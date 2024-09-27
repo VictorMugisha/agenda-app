@@ -15,3 +15,14 @@
   background: rgba(59, 134, 49, 0.861);
   color: white;
 }
+
+/* App danger button */
+.app-danger-btn {
+  background: rgba(208, 74, 74, 0.82);
+  color: rgba(255, 255, 255, 0.904);
+}
+
+.app-danger-btn:hover {
+  background: rgba(208, 74, 74, 0.48);
+  color: rgba(255, 255, 255, 0.904);
+}
