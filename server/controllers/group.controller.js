@@ -27,6 +27,7 @@ export async function createGroup(req, res) {
       name,
       password: hashedPassword,
       admin: admin._id,
+      members: [admin._id],
     });
 
     await newGroup.save();
