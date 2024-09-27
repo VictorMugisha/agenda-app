@@ -6,6 +6,7 @@ import cookieParser from "cookie-parser";
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/user.route.js";
 import authRoutes from "./routes/auth.route.js";
+import groupRoutes from "./routes/group.route.js";
 import protectedRoute from "./middlewares/protect.middleware.js";
 
 dotenv.config();
@@ -25,6 +26,7 @@ app.use(
 
 app.use("/auth", authRoutes);
 app.use("/users", protectedRoute, userRoutes);
+app.use("/groups", protectedRoute, groupRoutes);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
