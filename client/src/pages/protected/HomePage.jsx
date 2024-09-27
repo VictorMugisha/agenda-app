@@ -19,11 +19,18 @@ export default function HomePage() {
 
       <div className="mt-4">
         <h1 className="text-lg pb-3">Available Groups</h1>
-        <div className="grid md:grid-cols-3 gap-4">
+
+        <div className="grid md:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto scrollbar-hide">
           <div className="card shadow-md bg-app-primary">
             <div className="card-body">
               <h2 className="card-title text-base">Group Name</h2>
               <p className="text-sm">Group Description</p>
+              <h3 className="text-sm">
+                Admin:{" "}
+                <span className="font-semibold">
+                  Lastname
+                </span>
+              </h3>
               <div className="card-actions justify-end">
                 <button className="btn w-32 app-primary-btn">Join</button>
               </div>
@@ -34,6 +41,12 @@ export default function HomePage() {
             <div className="card-body">
               <h2 className="card-title text-base">Group Name</h2>
               <p className="text-sm">Group Description</p>
+              <h3 className="text-sm">
+                Admin:{" "}
+                <span className="font-semibold">
+                  Lastname
+                </span>
+              </h3>
               <div className="card-actions justify-end">
                 <button className="btn w-32 app-primary-btn">Join</button>
               </div>
@@ -44,6 +57,12 @@ export default function HomePage() {
             <div className="card-body">
               <h2 className="card-title text-base">Group Name</h2>
               <p className="text-sm">Group Description</p>
+              <h3 className="text-sm">
+                Admin:{" "}
+                <span className="font-semibold">
+                  Lastname
+                </span>
+              </h3>
               <div className="card-actions justify-end">
                 <button className="btn w-32 app-primary-btn">Join</button>
               </div>

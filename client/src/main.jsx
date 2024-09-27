@@ -13,6 +13,7 @@ import HomePage from "./pages/protected/HomePage.jsx";
 import { ChakraProvider } from "@chakra-ui/react";
 import AuthContextProvider from "./context/AuthContext.jsx";
 import PublicRoutes from "./layouts/PublicRoutes.jsx";
+import MyGroups from "./pages/protected/MyGroups.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -27,6 +28,9 @@ createRoot(document.getElementById("root")).render(
             </Route>
             <Route path="/app" element={<ProtectedRoute />}>
               <Route path="" element={<HomePage />} />
+              <Route path="notifications" element={<MyGroups />} />
+              <Route path="mygroups" element={<MyGroups />} />
+              <Route path="profile" element={<MyGroups />} />
             </Route>
             <Route path="*" element={<h1>Not Found</h1>} />
           </Routes>
