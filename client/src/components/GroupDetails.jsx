@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
-import { useGroupDetails } from "../../hooks";
+import { useGroupDetails } from "../hooks/index";
 import Loading from "../components/Loading"
 import PropTypes from "prop-types";
 
