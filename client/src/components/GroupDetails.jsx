@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useGroupDetails } from "../../hooks";
+import Loading from "../components/Loading"
 import PropTypes from "prop-types";
 
 export default function GroupDetails({ groupId }) {
@@ -10,18 +11,14 @@ export default function GroupDetails({ groupId }) {
     fetchGroupDetails();
   }, [fetchGroupDetails]);
 
-  if (loading) return (
-    <div className="text-center">
-      <span className="loading loading-dots loading-lg"></span>
-    </div>
-  );
+  if (loading) return <Loading />
 
   if (error) return (
     <div className="text-center">
       <p className="text-red-500">{error}</p>
     </div>
   );
-  
+
   if (!group) return <p>No group found.</p>;
 
   return (

@@ -2,6 +2,7 @@ import { useEffect } from "react";
 import { useAvailableGroups } from "../hooks/index";
 import GroupCard from "./GroupCard";
 import PropTypes from "prop-types";
+import Loading from "./Loading";
 
 export default function AvailableGroups({ searchQuery }) {
   const { groups, loading, error, availableGroups } = useAvailableGroups();
@@ -14,13 +15,8 @@ export default function AvailableGroups({ searchQuery }) {
     group.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading)
-    return (
-      <div className="text-center">
-        <span className="loading loading-dots loading-lg"></span>
-      </div>
-    );
-
+  if (loading) return <Loading />
+  
   if (error)
     return (
       <div className="text-center">
