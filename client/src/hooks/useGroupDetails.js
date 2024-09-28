@@ -21,11 +21,11 @@ export default function useGroupDetails(groupId) {
       });
 
       console.log("Response received: ", response);
-      
+
       if (!response.ok) {
-          console.log("Response was not ok: ", response.status);
+        console.log("Response was not ok: ", response.status);
         const errorData = await response.json();
-        throw new Error(errorData.message || "Failed to fetch group details");
+        throw new Error(errorData.message ?? "Failed to fetch group details");
       }
 
       const data = await response.json();

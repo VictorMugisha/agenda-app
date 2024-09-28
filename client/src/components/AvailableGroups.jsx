@@ -20,6 +20,7 @@ export default function AvailableGroups({ searchQuery }) {
         <span className="loading loading-dots loading-lg"></span>
       </div>
     );
+
   if (error)
     return (
       <div className="text-center">
