@@ -63,6 +63,11 @@ export default function GroupDetails({ groupId }) {
             Cancel
           </button>
         </Link>
+        <Link to="/app/group-chat">
+          <button className="btn bg-gray-200 text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md">
+            Open
+          </button>
+        </Link>
         <JoinGroupForm groupId={groupId} />
       </div>
     </div>
