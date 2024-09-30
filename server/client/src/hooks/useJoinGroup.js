@@ -5,7 +5,6 @@ export default function useJoinGroup(groupId) {
   const toast = useToast();
 
   async function joinGroup(password) {
-
     try {
       const response = await fetch(`/api/groups/join/${groupId}`, {
         method: "POST",
@@ -17,7 +16,6 @@ export default function useJoinGroup(groupId) {
       });
 
       if (!response.ok) {
-        console.log("Response after joining group error: ", response);
         const errorData = await response.json();
         toast({
           title: "Error",
@@ -30,14 +28,13 @@ export default function useJoinGroup(groupId) {
       }
 
       const data = await response.json();
-      console.log("Response after joining group success: ", data);
       toast({
         title: "Success",
         description: "Joined group successfully",
         status: "success",
         duration: 5000,
         isClosable: true,
-      })
+      });
 
       return data;
     } catch (error) {

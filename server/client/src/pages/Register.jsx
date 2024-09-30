@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { CLOUD_NAME, UPLOAD_PRESET } from "../constants/constants";
 
 export default function Register() {
@@ -17,6 +17,7 @@ export default function Register() {
   const [profileImage, setProfileImage] = useState(null);
   const [uploadingImage, setUploadingImage] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
+  const navigate = useNavigate();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -80,7 +81,8 @@ export default function Register() {
       if (!response.ok) {
         throw new Error(result.message || "Something went wrong!");
       }
-      console.log("User registered successfully!");
+
+      navigate("/login");
     } catch (error) {
       console.error("Error:", error);
       setUploadingImage(false);

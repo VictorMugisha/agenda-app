@@ -29,9 +29,9 @@ app.use(
   })
 );
 
-app.use("/api/auth", authRoutes);
-app.use("/api/users", protectedRoute, userRoutes);
-app.use("/api/groups", protectedRoute, groupRoutes);
+app.use("/auth", authRoutes);
+app.use("/users", protectedRoute, userRoutes);
+app.use("/groups", protectedRoute, groupRoutes);
 
 // Serve the frontend client (React app)
 app.use(express.static(path.join(__dirname, "/client/dist")));
