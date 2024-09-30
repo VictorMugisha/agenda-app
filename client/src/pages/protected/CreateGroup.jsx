@@ -98,7 +98,7 @@ export default function CreateGroup() {
       }
 
       // On successful group creation, redirect to the group details page
-      navigate(`/group/${result._id}`);
+      navigate(`/app/group/${result._id}`);
     } catch (error) {
       console.error("Error creating group:", error);
       setError("Internal server error");

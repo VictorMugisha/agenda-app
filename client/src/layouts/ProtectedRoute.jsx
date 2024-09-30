@@ -12,6 +12,6 @@ export default function ProtectedRoute() {
       <Footer />
     </main>
   ) : (
-    <Navigate to="/login" replace />
+    <Navigate to="/" replace />
   );
 }

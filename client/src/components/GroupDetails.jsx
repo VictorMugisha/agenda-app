@@ -28,7 +28,7 @@ export default function GroupDetails({ groupId }) {
     <div className="flex flex-col items-center">
       <img
         className="w-full h-64 object-cover rounded-xl"
-        src="https://img.daisyui.com/images/stock/photo-1606107557195-0e29a4b5b4aa.webp"
+        src={group.coverImg}
         alt="Group"
       />
 

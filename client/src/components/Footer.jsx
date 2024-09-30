@@ -6,7 +6,7 @@ import { FaUser } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
 export default function Footer() {
   return (
-    <footer className="w-full py-2 fixed bottom-0 bg-white">
+    <footer className="w-full py-2 fixed bottom-0 bg-app-primary">
       <menu className="flex items-center justify-evenly">
         <NavLink
           className={({ isActive }) =>

@@ -6,7 +6,7 @@ export default {
   theme: {
     extend: {
       colors: {
-        "app-primary": "rgba(210, 205, 205, 0.178)",
+        "app-primary": "#F7F6F6",
         "app-secondary": "rgba(71, 162, 59, 0.904)",
       },
       fontSize: {
