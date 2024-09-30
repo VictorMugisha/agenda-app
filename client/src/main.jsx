@@ -18,12 +18,13 @@ import Profile from "./pages/protected/Profile.jsx";
 import Notifications from "./pages/protected/Notifications.jsx";
 import GroupDetailsPage from "./pages/protected/GroupDetailsPage.jsx";
 import CreateGroup from "./pages/protected/CreateGroup.jsx";
+import customTheme from "./chakra/theme.js";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
     <BrowserRouter>
       <AuthContextProvider>
-        <ChakraProvider>
+        <ChakraProvider theme={customTheme}>
           <Routes>
             <Route path="/" element={<PublicRoutes />}>
               <Route index element={<App />} />

@@ -1,5 +1,6 @@
 import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
+import JoinGroupForm from "./JoinGroupForm";
 
 export default function GroupCard({ group }) {
   return (
@@ -14,7 +15,7 @@ export default function GroupCard({ group }) {
           <Link to={`group/${group._id}`}>
             <button className="btn w-32 app-secondary-btn">View</button>
           </Link>
-          <button className="btn w-32 app-primary-btn">Join</button>
+          <JoinGroupForm groupId={group._id} />
         </div>
       </div>
     </div>

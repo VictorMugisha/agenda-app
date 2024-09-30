@@ -4,6 +4,7 @@ import { useGroupDetails } from "../hooks/index";
 import Loading from "../components/Loading";
 import PropTypes from "prop-types";
 import { formatDistanceToNow } from "date-fns";
+import JoinGroupForm from "./JoinGroupForm";
 
 export default function GroupDetails({ groupId }) {
   const { group, loading, error, fetchGroupDetails } = useGroupDetails(groupId);
@@ -51,7 +52,7 @@ export default function GroupDetails({ groupId }) {
         <Link to="..">
           <button className="btn w-32 app-secondary-btn">Cancel</button>
         </Link>
-        <button className="btn w-32 app-primary-btn">Join</button>
+        <JoinGroupForm />
       </div>
     </div>
   );
