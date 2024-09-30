@@ -80,7 +80,7 @@ export default function CreateGroup() {
         coverImg: coverImgUrl,
       };
 
-      const response = await fetch(`${BACKEND_URL}/groups/create`, {
+      const response = await fetch(`${BACKEND_URL}/groups/new`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -98,7 +98,7 @@ export default function CreateGroup() {
       }
 
       // On successful group creation, redirect to the group details page
-      navigate(`/groups/group/${result._id}`);
+      navigate(`/group/${result._id}`);
     } catch (error) {
       console.error("Error creating group:", error);
       setError("Internal server error");
