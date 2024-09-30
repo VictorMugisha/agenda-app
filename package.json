@@ -6,7 +6,8 @@
   "type": "module",
   "scripts": {
     "server": "nodemon server/server.js",
-    "start": "node server/server.js"
+    "start": "node server/server.js",
+    "build": "npm install --prefix ./server/client && npm run build --prefix ./server/client && npm install"
   },
   "keywords": [],
   "author": "",
