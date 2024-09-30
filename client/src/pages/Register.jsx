@@ -236,6 +236,13 @@ export default function Register() {
             Login
           </Link>
         </p>
+
+        <p className="text-center mt-4">
+          Go back to{" "}
+          <Link to="/" className="text-blue-500 hover:text-blue-700">
+            Home
+          </Link>
+        </p>
       </div>
     </div>
   );
