@@ -52,7 +52,7 @@ export default function GroupDetails({ groupId }) {
         <Link to="..">
           <button className="btn w-32 app-secondary-btn">Cancel</button>
         </Link>
-        <JoinGroupForm />
+        <JoinGroupForm groupId={groupId} />
       </div>
     </div>
   );
