@@ -1,10 +1,6 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import {
-  BACKEND_URL,
-  CLOUD_NAME,
-  UPLOAD_PRESET,
-} from "../../constants/constants";
+import { CLOUD_NAME, UPLOAD_PRESET } from "../../constants/constants";
 import { getAuthToken } from "../../utils/utils";
 
 export default function CreateGroup() {
@@ -80,11 +76,11 @@ export default function CreateGroup() {
         coverImg: coverImgUrl,
       };
 
-      const response = await fetch(`${BACKEND_URL}/groups/new`, {
+      const response = await fetch("/api/groups/new", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
-          Authorization: `Bearer ${getAuthToken()}`, // Add auth token
+          Authorization: `Bearer ${getAuthToken()}`,
         },
         body: JSON.stringify(finalFormData),
       });

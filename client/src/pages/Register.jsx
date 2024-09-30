@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { BACKEND_URL, CLOUD_NAME, UPLOAD_PRESET } from "../constants/constants";
+import { CLOUD_NAME, UPLOAD_PRESET } from "../constants/constants";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -67,7 +67,7 @@ export default function Register() {
       };
 
       // Submit form data to backend
-      const response = await fetch(`${BACKEND_URL}/auth/register`, {
+      const response = await fetch("/api/auth/register", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

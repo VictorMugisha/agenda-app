@@ -1,6 +1,5 @@
 import { useToast } from "@chakra-ui/react";
 import { useNavigate } from "react-router-dom";
-import { BACKEND_URL } from "../constants/constants";
 import { useState } from "react";
 import useAuthContext from "./useAuthContext";
 
@@ -12,7 +11,7 @@ export default function useLogin() {
   async function login(username, password) {
     try {
       setLoading(true);
-      const response = await fetch(`${BACKEND_URL}/auth/login`, {
+      const response = await fetch("/api/auth/login", {
         method: "post",
         headers: {
           "Content-Type": "application/json",

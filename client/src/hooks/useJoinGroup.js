@@ -1,4 +1,3 @@
-import { BACKEND_URL } from "../constants/constants";
 import { getAuthToken } from "../utils/utils";
 import { useToast } from "@chakra-ui/react";
 
@@ -8,7 +7,7 @@ export default function useJoinGroup(groupId) {
   async function joinGroup(password) {
 
     try {
-      const response = await fetch(`${BACKEND_URL}/groups/join/${groupId}`, {
+      const response = await fetch(`/api/groups/join/${groupId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

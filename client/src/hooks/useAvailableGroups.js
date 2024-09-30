@@ -1,5 +1,4 @@
 import { useState, useCallback } from "react";
-import { BACKEND_URL } from "../constants/constants";
 import { getAuthToken } from "../utils/utils";
 
 export default function useAvailableGroups() {
@@ -12,7 +11,7 @@ export default function useAvailableGroups() {
     setError(null);
 
     try {
-      const response = await fetch(`${BACKEND_URL}/groups/all`, {
+      const response = await fetch("/api/groups/all", {
         method: "GET",
         headers: {
           "Content-Type": "application/json",
