@@ -1,8 +1,9 @@
 import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { useGroupDetails } from "../hooks/index";
-import Loading from "../components/Loading"
+import Loading from "../components/Loading";
 import PropTypes from "prop-types";
+import { formatDistanceToNow } from "date-fns";
 
 export default function GroupDetails({ groupId }) {
   const { group, loading, error, fetchGroupDetails } = useGroupDetails(groupId);
@@ -11,13 +12,14 @@ export default function GroupDetails({ groupId }) {
     fetchGroupDetails();
   }, [fetchGroupDetails]);
 
-  if (loading) return <Loading />
+  if (loading) return <Loading />;
 
-  if (error) return (
-    <div className="text-center">
-      <p className="text-red-500">{error}</p>
-    </div>
-  );
+  if (error)
+    return (
+      <div className="text-center">
+        <p className="text-red-500">{error}</p>
+      </div>
+    );
 
   if (!group) return <p>No group found.</p>;
 
@@ -37,7 +39,11 @@ export default function GroupDetails({ groupId }) {
         </p>
         <p className="text-sm pb-1">Members: {group.members.length} Members</p>
         <p className="text-sm pb-1">
-          Created: {new Date(group.createdAt).toLocaleDateString()}
+          Created:{" "}
+          {formatDistanceToNow(new Date(group.createdAt), { addSuffix: true })}
+        </p>
+        <p className="text-sm pb-1">
+          Date: {new Date(group.createdAt).toLocaleDateString()}
         </p>
       </div>
 

@@ -20,8 +20,6 @@ export default function useGroupDetails(groupId) {
         },
       });
 
-      console.log("Response received: ", response);
-
       if (!response.ok) {
         console.log("Response was not ok: ", response.status);
         const errorData = await response.json();

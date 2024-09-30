@@ -83,7 +83,14 @@ export async function getSingleGroup(req, res) {
     const { id } = req.params;
     const group = await GroupModel.findById(id)
       .select("-password")
-      .populate("admin members");
+      .populate({
+        path: "admin",
+        select: "-password",
+      })
+      .populate({
+        path: "members",
+        select: "-password",
+      });
 
     if (!group) {
       return res.status(404).json({ message: "Group not found" });
