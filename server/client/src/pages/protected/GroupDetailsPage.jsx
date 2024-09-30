@@ -6,7 +6,7 @@ export default function GroupDetailsPage() {
 
   return (
     <div className="mt-4">
-      <h1 className="text-2xl font-semibold pb-3">Group Details</h1>
+      <h1 className="text-2xl font-semibold pb-7">Group Details</h1>
 
       <GroupDetails groupId={groupId} />
     </div>

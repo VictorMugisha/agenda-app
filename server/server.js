@@ -9,10 +9,16 @@ import authRoutes from "./routes/auth.route.js";
 import groupRoutes from "./routes/group.route.js";
 import protectedRoute from "./middlewares/protect.middleware.js";
 
+import path from "path";
+import { fileURLToPath } from "url";
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+
 dotenv.config();
 connectDB();
 
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 8000;
 const app = express();
 
 app.use(cookieParser());
@@ -23,9 +29,16 @@ app.use(
   })
 );
 
-app.use("/auth", authRoutes);
-app.use("/users", protectedRoute, userRoutes);
-app.use("/groups", protectedRoute, groupRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", protectedRoute, userRoutes);
+app.use("/api/groups", protectedRoute, groupRoutes);
+
+// Serve the frontend client (React app)
+app.use(express.static(path.join(__dirname, "/client/dist")));
+
+app.get("*", (req, res) => {
+  return res.sendFile(path.join(__dirname, "/client/dist/index.html"));
+});
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);
