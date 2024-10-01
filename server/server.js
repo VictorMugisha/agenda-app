@@ -30,16 +30,9 @@ app.use(
   })
 );
 
-// Routes for production
-// app.use("/api/auth", authRoutes);
-// app.use("/api/users", protectedRoute, userRoutes);
-// app.use("/api/groups", protectedRoute, groupRoutes);
-// app.use("/request", protectedRoute, requestRoutes);
-
-// Routes for development
-app.use("/auth", authRoutes);
-app.use("/users", protectedRoute, userRoutes);
-app.use("/groups", protectedRoute, groupRoutes);
+app.use("/api/auth", authRoutes);
+app.use("/api/users", protectedRoute, userRoutes);
+app.use("/api/groups", protectedRoute, groupRoutes);
 app.use("/request", protectedRoute, requestRoutes);
 
 // Serve the frontend client (React app)
