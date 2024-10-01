@@ -18,6 +18,18 @@ export async function createRequest(req, res) {
       return res.status(404).json({ message: "Group doesn't exist" });
     }
 
+    if (group.members.includes(userId)) {
+      return res
+        .status(400)
+        .json({ message: "You are already a member of this group" });
+    }
+
+    if (group.admin.toString() === userId.toString()) {
+      return res
+        .status(400)
+        .json({ message: "You are the admin of this group" });
+    }
+
     const groupAdmin = group.admin;
 
     const request = new RequestModel({
