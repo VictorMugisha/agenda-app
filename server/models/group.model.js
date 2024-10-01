@@ -16,10 +16,6 @@ const groupSchema = new mongoose.Schema(
       default:
         "https://res.cloudinary.com/victormugisha/image/upload/v1727431362/default_group_cover_twl0vc.webp",
     },
-    password: {
-      type: String,
-      required: true,
-    },
     members: {
       type: [mongoose.Schema.Types.ObjectId],
       ref: "User",

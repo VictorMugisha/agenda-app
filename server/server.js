@@ -7,6 +7,7 @@ import connectDB from "./config/db.js";
 import userRoutes from "./routes/user.route.js";
 import authRoutes from "./routes/auth.route.js";
 import groupRoutes from "./routes/group.route.js";
+import requestRoutes from "./routes/request.route.js";
 import protectedRoute from "./middlewares/protect.middleware.js";
 
 import path from "path";
@@ -29,9 +30,17 @@ app.use(
   })
 );
 
-app.use("/api/auth", authRoutes);
-app.use("/api/users", protectedRoute, userRoutes);
-app.use("/api/groups", protectedRoute, groupRoutes);
+// Routes for production
+// app.use("/api/auth", authRoutes);
+// app.use("/api/users", protectedRoute, userRoutes);
+// app.use("/api/groups", protectedRoute, groupRoutes);
+// app.use("/request", protectedRoute, requestRoutes);
+
+// Routes for development
+app.use("/auth", authRoutes);
+app.use("/users", protectedRoute, userRoutes);
+app.use("/groups", protectedRoute, groupRoutes);
+app.use("/request", protectedRoute, requestRoutes);
 
 // Serve the frontend client (React app)
 app.use(express.static(path.join(__dirname, "/client/dist")));
