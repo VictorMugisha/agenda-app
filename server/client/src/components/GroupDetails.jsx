@@ -4,10 +4,12 @@ import { useGroupDetails } from "../hooks/index";
 import Loading from "../components/Loading";
 import PropTypes from "prop-types";
 import { formatDistanceToNow } from "date-fns";
+import useSendRequest from "../hooks/useSendRequest";
 // import JoinGroupForm from "./JoinGroupForm";
 
 export default function GroupDetails({ groupId }) {
   const { group, loading, error, fetchGroupDetails } = useGroupDetails(groupId);
+  const { loading: requestLoading, sendRequest } = useSendRequest();
 
   useEffect(() => {
     fetchGroupDetails();
@@ -68,6 +70,14 @@ export default function GroupDetails({ groupId }) {
             Open
           </button>
         </Link>
+        <button
+          className="btn app-primary-btn text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md"
+          onClick={() => sendRequest(groupId)}
+          disabled={requestLoading}
+          style={{ cursor: requestLoading ? "not-allowed" : "pointer" }}
+        >
+          Request
+        </button>
         {/* <JoinGroupForm groupId={groupId} /> */}
       </div>
     </div>
