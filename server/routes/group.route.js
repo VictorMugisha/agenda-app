@@ -42,4 +42,9 @@ router.get('/:groupId/membership', async (req, res) => {
   }
 });
 
+// New routes
+router.get('/my-groups', getMyGroups);
+router.post('/:groupId/join', joinGroup);
+router.post('/:groupId/leave', leaveGroup);
+
 export default router;

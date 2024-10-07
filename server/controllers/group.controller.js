@@ -76,21 +76,17 @@ export async function getAllGroups(req, res) {
 
 export async function getMyGroups(req, res) {
   try {
-    const myGroups = await GroupModel.find({ admin: req.loggedInUser._id })
-      .populate({
-        path: "admin",
-        select: "-password",
-      })
-      .populate({
-        path: "members",
-        select: "-password",
-      });
+    const userId = req.loggedInUser._id;
+    const myGroups = await GroupModel.find({ members: userId })
+      .populate('admin', 'firstName lastName username')
+      .select('-password');
+
     res.status(200).json(myGroups);
   } catch (error) {
-    console.log("Error in getMyGroups controller: ", error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error('Error in getMyGroups controller:', error);
+    res.status(500).json({ message: 'Failed to fetch your groups' });
   }
-}
+};
 
 export async function getSingleGroup(req, res) {
   try {
@@ -186,18 +182,14 @@ export async function deleteGroup(req, res) {
   }
 }
 
-export async function joinGroup(req, res) {
+export const joinGroup = async (req, res) => {
   try {
-    const { id: groupId } = req.params;
-    const { _id: userId } = req.loggedInUser;
-
-    if (!mongoose.Types.ObjectId.isValid(groupId)) {
-      return res.status(400).json({ message: "Invalid id" });
-    }
+    const { groupId } = req.params;
+    const userId = req.loggedInUser._id;
 
     const group = await GroupModel.findById(groupId);
     if (!group) {
-      return res.status(400).json({ message: "Group doesn't exist" });
+      return res.status(404).json({ message: "Group not found" });
     }
 
     if (group.members.includes(userId)) {
@@ -206,58 +198,40 @@ export async function joinGroup(req, res) {
         .json({ message: "You are already a member of this group" });
     }
 
-    if (group.admin.toString() === userId.toString()) {
-      return res
-        .status(400)
-        .json({ message: "You are the admin of this group" });
-    }
+    group.members.push(userId);
+    await group.save();
 
-    const updatedGroup = await GroupModel.findByIdAndUpdate(
-      groupId,
-      { $push: { members: userId } },
-      { new: true, runValidators: true, upsert: false }
-    );
-
-    res.status(200).json(updatedGroup);
+    res.status(200).json(group);
   } catch (error) {
-    console.log("Error in joinGroup controller: ", error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("Error in joinGroup controller:", error);
+    res.status(500).json({ message: "Failed to join the group" });
   }
-}
+};
 
-export async function leaveGroup(req, res) {
+export const leaveGroup = async (req, res) => {
   try {
-    const { id: groupId } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(groupId)) {
-      return res.status(400).json({ message: "Invalid id" });
-    }
+    const { groupId } = req.params;
+    const userId = req.loggedInUser._id;
 
     const group = await GroupModel.findById(groupId);
     if (!group) {
-      return res.status(400).json({ message: "Group doesn't exist" });
+      return res.status(404).json({ message: "Group not found" });
     }
 
-    if (!group.members.includes(req.loggedInUser._id)) {
+    if (!group.members.includes(userId)) {
       return res
         .status(400)
         .json({ message: "You are not a member of this group" });
     }
 
-    if (group.admin.toString() === req.loggedInUser._id.toString()) {
-      return res
-        .status(400)
-        .json({ message: "You cannot leave the group as the admin" });
-    }
+    group.members = group.members.filter(
+      (memberId) => memberId.toString() !== userId.toString()
+    );
+    await group.save();
 
-    const updatedGroup = await GroupModel.findByIdAndUpdate(
-      groupId,
-      { $pull: { members: req.loggedInUser._id } },
-      { new: true, runValidators: true, upsert: false }
-    ).select("-password");
-
-    res.status(200).json({ message: "You left the group successfully!" });
+    res.status(200).json({ message: "Successfully left the group" });
   } catch (error) {
-    console.log("Error in leaveGroup controller: ", error);
-    return res.status(500).json({ message: "Internal server error" });
+    console.error("Error in leaveGroup controller:", error);
+    res.status(500).json({ message: "Failed to leave the group" });
   }
-}
+};

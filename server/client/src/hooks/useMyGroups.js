@@ -1,22 +1,19 @@
 import { useState, useCallback } from "react";
-import { useAuth } from "./useAuth";
+import { getAuthToken } from "../utils/utils";
 
 export const useMyGroups = () => {
   const [groups, setGroups] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { user } = useAuth();
 
   const fetchMyGroups = useCallback(async () => {
-    if (!user) return;
-
     setLoading(true);
     setError(null);
 
     try {
       const response = await fetch("/api/groups/my-groups", {
         headers: {
-          'Authorization': `Bearer ${user.token}`,
+          'Authorization': `Bearer ${getAuthToken()}`,
           'Content-Type': 'application/json'
         }
       });
@@ -28,11 +25,9 @@ export const useMyGroups = () => {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   const joinGroup = useCallback(async (groupId) => {
-    if (!user) return;
-
     setLoading(true);
     setError(null);
 
@@ -40,7 +35,7 @@ export const useMyGroups = () => {
       const response = await fetch(`/api/groups/${groupId}/join`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${user.token}`,
+          'Authorization': `Bearer ${getAuthToken()}`,
           'Content-Type': 'application/json'
         }
       });
@@ -52,11 +47,9 @@ export const useMyGroups = () => {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   const leaveGroup = useCallback(async (groupId) => {
-    if (!user) return;
-
     setLoading(true);
     setError(null);
 
@@ -64,7 +57,7 @@ export const useMyGroups = () => {
       const response = await fetch(`/api/groups/${groupId}/leave`, {
         method: 'POST',
         headers: {
-          'Authorization': `Bearer ${user.token}`,
+          'Authorization': `Bearer ${getAuthToken()}`,
           'Content-Type': 'application/json'
         }
       });
@@ -75,7 +68,7 @@ export const useMyGroups = () => {
     } finally {
       setLoading(false);
     }
-  }, [user]);
+  }, []);
 
   return {
     groups,
