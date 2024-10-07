@@ -158,30 +158,6 @@ export async function updateGroup(req, res) {
   }
 }
 
-export async function deleteGroup(req, res) {
-  try {
-    const { id } = req.params;
-    if (!mongoose.Types.ObjectId.isValid(id)) {
-      return res.status(400).json({ message: "Invalid id" });
-    }
-
-    const group = await GroupModel.findById(id);
-    if (!group) {
-      return res.status(400).json({ message: "Group doesn't exist" });
-    }
-
-    if (group.admin.toString() !== req.loggedInUser._id.toString()) {
-      return res.status(401).json({ message: "You cannot delete this group" });
-    }
-
-    await GroupModel.findByIdAndDelete(id);
-    res.status(200).json({ message: "Group deleted successfully!" });
-  } catch (error) {
-    console.log("Error in deleteGroup controller: ", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-}
-
 export const joinGroup = async (req, res) => {
   try {
     const { groupId } = req.params;
@@ -233,5 +209,28 @@ export const leaveGroup = async (req, res) => {
   } catch (error) {
     console.error("Error in leaveGroup controller:", error);
     res.status(500).json({ message: "Failed to leave the group" });
+  }
+};
+
+export const deleteGroup = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const userId = req.loggedInUser._id;
+
+    const group = await GroupModel.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    if (group.admin.toString() !== userId.toString()) {
+      return res.status(403).json({ message: "Only the group admin can delete the group" });
+    }
+
+    await GroupModel.findByIdAndDelete(groupId);
+
+    res.status(200).json({ message: "Group successfully deleted" });
+  } catch (error) {
+    console.error("Error in deleteGroup controller:", error);
+    res.status(500).json({ message: "Failed to delete the group" });
   }
 };

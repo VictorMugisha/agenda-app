@@ -47,4 +47,6 @@ router.get('/my-groups', getMyGroups);
 router.post('/:groupId/join', joinGroup);
 router.post('/:groupId/leave', leaveGroup);
 
+router.delete('/:groupId', deleteGroup);
+
 export default router;

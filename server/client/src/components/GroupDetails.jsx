@@ -1,18 +1,33 @@
 import { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { useGroupDetails } from "../hooks/index";
+import { Link, useNavigate } from "react-router-dom";
+import { useGroupDetails, useDeleteGroup } from "../hooks/index";
 import { useAuth } from "../hooks/useAuth";
 import Loading from "../components/Loading";
 import PropTypes from "prop-types";
 import { formatDistanceToNow } from "date-fns";
 import useSendRequest from "../hooks/useSendRequest";
-import { getAuthToken } from "../utils/utils"; // Import getAuthToken utility
+import { getAuthToken } from "../utils/utils";
+import {
+  Modal,
+  ModalOverlay,
+  ModalContent,
+  ModalHeader,
+  ModalFooter,
+  ModalBody,
+  ModalCloseButton,
+  Button,
+  useDisclosure,
+} from "@chakra-ui/react";
 
 export default function GroupDetails({ groupId }) {
   const { group, loading, error, fetchGroupDetails } = useGroupDetails(groupId);
   const { loading: requestLoading, sendRequest } = useSendRequest();
   const { isAuthenticated } = useAuth();
   const [isUserMemberOrAdmin, setIsUserMemberOrAdmin] = useState(false);
+  const [isUserAdmin, setIsUserAdmin] = useState(false);
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { deleteGroup, loading: deleteLoading, error: deleteError } = useDeleteGroup();
+  const navigate = useNavigate();
 
   useEffect(() => {
     fetchGroupDetails();
@@ -29,6 +44,7 @@ export default function GroupDetails({ groupId }) {
           });
           const data = await response.json();
           setIsUserMemberOrAdmin(data.isMember || data.isAdmin);
+          setIsUserAdmin(data.isAdmin);
         } catch (error) {
           console.error("Error checking user membership:", error);
         }
@@ -37,6 +53,14 @@ export default function GroupDetails({ groupId }) {
 
     checkUserMembership();
   }, [group, groupId, isAuthenticated]);
+
+  const handleDeleteGroup = async () => {
+    const success = await deleteGroup(groupId);
+    if (success) {
+      onClose();
+      navigate("/app/mygroups");
+    }
+  };
 
   if (loading) return <Loading />;
 
@@ -104,7 +128,35 @@ export default function GroupDetails({ groupId }) {
             Request
           </button>
         )}
+        {isUserAdmin && (
+          <button
+            className="btn bg-red-500 text-white hover:bg-red-600 py-2 px-6 rounded-lg shadow-md"
+            onClick={onOpen}
+          >
+            Delete Group
+          </button>
+        )}
       </div>
+
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Confirm Delete Group</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            Are you sure you want to delete this group? This action cannot be undone.
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="gray" mr={3} onClick={onClose}>
+              Cancel
+            </Button>
+            <Button colorScheme="red" onClick={handleDeleteGroup} isLoading={deleteLoading}>
+              Delete
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
+      {deleteError && <p className="text-red-500 mt-4">{deleteError}</p>}
     </div>
   );
 }
