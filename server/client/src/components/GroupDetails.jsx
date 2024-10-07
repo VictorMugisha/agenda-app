@@ -22,8 +22,7 @@ import GroupRequests from './GroupRequests';
 import EditGroupForm from './EditGroupForm';
 
 export default function GroupDetails({ groupId }) {
-  const { group: initialGroup, loading, error, fetchGroupDetails } = useGroupDetails(groupId);
-  const [group, setGroup] = useState(null);
+  const { group, setGroup, loading, error, fetchGroupDetails } = useGroupDetails(groupId);
   const { loading: requestLoading, sendRequest } = useSendRequest();
   const { isAuthenticated } = useAuth();
   const [isUserMemberOrAdmin, setIsUserMemberOrAdmin] = useState(false);
@@ -37,12 +36,6 @@ export default function GroupDetails({ groupId }) {
   useEffect(() => {
     fetchGroupDetails();
   }, [fetchGroupDetails]);
-
-  useEffect(() => {
-    if (initialGroup) {
-      setGroup(initialGroup);
-    }
-  }, [initialGroup]);
 
   useEffect(() => {
     const checkUserMembership = async () => {
@@ -75,7 +68,12 @@ export default function GroupDetails({ groupId }) {
   };
 
   const handleUpdateGroup = (updatedGroup) => {
-    setGroup(updatedGroup);
+    setGroup(prevGroup => ({
+      ...prevGroup,
+      ...updatedGroup
+    }));
+    fetchGroupDetails();
+    
     setShowEditForm(false);
   };
 
