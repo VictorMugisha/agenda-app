@@ -37,7 +37,6 @@ createRoot(document.getElementById("root")).render(
               <Route path="notifications" element={<Notifications />} />
               <Route path="create" element={<CreateGroup />} />
               <Route path="mygroups" element={<MyGroups />} />
-              <Route path="group-chat" element={<GroupChat />} />
               <Route path="group/:id" element={<GroupDetailsPage />} />
               <Route path="profile" element={<Profile />} />
               <Route path="group/:groupId/chat" element={<GroupChat />} />

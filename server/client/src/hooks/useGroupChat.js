@@ -1,6 +1,6 @@
 /* eslint-disable no-unused-vars */
 import { useState, useEffect, useCallback } from 'react';
-import axios from 'axios'; // Assuming you're using axios for API calls
+import { getAuthToken } from "../utils/utils";
 
 export const useGroupChat = (groupId) => {
   const [messages, setMessages] = useState([]);
@@ -8,11 +8,24 @@ export const useGroupChat = (groupId) => {
   const [error, setError] = useState(null);
 
   const fetchMessages = useCallback(async () => {
+    if (!groupId) {
+      setError('No group ID provided');
+      setLoading(false);
+      return;
+    }
+
     try {
       setLoading(true);
-      // Replace with your actual API endpoint
-      const response = await axios.get(`/api/groups/${groupId}/messages`);
-      setMessages(response.data);
+      const response = await fetch(`/api/messages/${groupId}`, {
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to fetch messages');
+      }
+      const data = await response.json();
+      setMessages(data);
       setLoading(false);
     } catch (err) {
       setError('Failed to fetch messages');
@@ -26,9 +39,19 @@ export const useGroupChat = (groupId) => {
 
   const sendMessage = async (content) => {
     try {
-      // Replace with your actual API endpoint
-      const response = await axios.post(`/api/groups/${groupId}/messages`, { content });
-      setMessages([...messages, response.data]);
+      const response = await fetch(`/api/messages/${groupId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify({ content }),
+      });
+      if (!response.ok) {
+        throw new Error('Failed to send message');
+      }
+      const newMessage = await response.json();
+      setMessages([...messages, newMessage]);
     } catch (err) {
       setError('Failed to send message');
     }
@@ -36,17 +59,19 @@ export const useGroupChat = (groupId) => {
 
   const deleteMessage = async (messageId) => {
     try {
-      // Replace with your actual API endpoint
-      await axios.delete(`/api/groups/${groupId}/messages/${messageId}`);
-      setMessages(messages.filter(message => message.id !== messageId));
+      const response = await fetch(`/api/messages/${messageId}`, {
+        method: 'DELETE',
+        headers: {
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to delete message');
+      }
+      setMessages(messages.filter(message => message._id !== messageId));
     } catch (err) {
       setError('Failed to delete message');
     }
-  };
-
-  // If you're implementing real-time updates, you could add a function like this:
-  const addIncomingMessage = (message) => {
-    setMessages(prevMessages => [...prevMessages, message]);
   };
 
   return {
@@ -55,7 +80,6 @@ export const useGroupChat = (groupId) => {
     error,
     sendMessage,
     deleteMessage,
-    addIncomingMessage, // Include this if you're using real-time updates
     refreshMessages: fetchMessages
   };
 };

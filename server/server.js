@@ -10,6 +10,7 @@ import groupRoutes from "./routes/group.route.js";
 import requestRoutes from "./routes/request.route.js";
 import protectedRoute from "./middlewares/protect.middleware.js";
 import messageRoutes from "./routes/message.route.js";
+import notificationRoutes from "./routes/notification.route.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -34,8 +35,9 @@ app.use(
 app.use("/api/auth", authRoutes);
 app.use("/api/users", protectedRoute, userRoutes);
 app.use("/api/groups", protectedRoute, groupRoutes);
-app.use("/request", protectedRoute, requestRoutes);
-app.use("/api/messages", messageRoutes);
+app.use("/api/request", protectedRoute, requestRoutes);
+app.use("/api/messages", protectedRoute, messageRoutes);
+app.use("/api/notifications", protectedRoute, notificationRoutes);
 
 // Serve the frontend client (React app)
 app.use(express.static(path.join(__dirname, "/client/dist")));

@@ -127,3 +127,36 @@ export async function deleteUser(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export async function getProfile(req, res) {
+  try {
+    const user = await UserModel.findById(req.loggedInUser._id).select("-password");
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    res.status(200).json(user);
+  } catch (error) {
+    console.log("Error in getProfile controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}
+
+export async function updateProfile(req, res) {
+  try {
+    const { firstName, lastName, email } = req.body;
+    const updatedUser = await UserModel.findByIdAndUpdate(
+      req.loggedInUser._id,
+      { firstName, lastName, email },
+      { new: true, runValidators: true }
+    ).select("-password");
+
+    if (!updatedUser) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(updatedUser);
+  } catch (error) {
+    console.log("Error in updateProfile controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}

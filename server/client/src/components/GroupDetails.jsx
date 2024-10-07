@@ -1,19 +1,42 @@
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { useGroupDetails } from "../hooks/index";
+import { useAuth } from "../hooks/useAuth";
 import Loading from "../components/Loading";
 import PropTypes from "prop-types";
 import { formatDistanceToNow } from "date-fns";
 import useSendRequest from "../hooks/useSendRequest";
-// import JoinGroupForm from "./JoinGroupForm";
+import { getAuthToken } from "../utils/utils"; // Import getAuthToken utility
 
 export default function GroupDetails({ groupId }) {
   const { group, loading, error, fetchGroupDetails } = useGroupDetails(groupId);
   const { loading: requestLoading, sendRequest } = useSendRequest();
+  const { isAuthenticated } = useAuth();
+  const [isUserMemberOrAdmin, setIsUserMemberOrAdmin] = useState(false);
 
   useEffect(() => {
     fetchGroupDetails();
   }, [fetchGroupDetails]);
+
+  useEffect(() => {
+    const checkUserMembership = async () => {
+      if (group && isAuthenticated) {
+        try {
+          const response = await fetch(`/api/groups/${groupId}/membership`, {
+            headers: {
+              Authorization: `Bearer ${getAuthToken()}`,
+            },
+          });
+          const data = await response.json();
+          setIsUserMemberOrAdmin(data.isMember || data.isAdmin);
+        } catch (error) {
+          console.error("Error checking user membership:", error);
+        }
+      }
+    };
+
+    checkUserMembership();
+  }, [group, groupId, isAuthenticated]);
 
   if (loading) return <Loading />;
 
@@ -65,20 +88,22 @@ export default function GroupDetails({ groupId }) {
             Cancel
           </button>
         </Link>
-        <Link to="/app/group-chat">
-          <button className="btn bg-gray-200 text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md">
-            Open
+        {isUserMemberOrAdmin ? (
+          <Link to={`/app/group/${groupId}/chat`}>
+            <button className="btn bg-gray-200 text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md">
+              Open
+            </button>
+          </Link>
+        ) : (
+          <button
+            className="btn app-primary-btn text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md"
+            onClick={() => sendRequest(groupId)}
+            disabled={requestLoading}
+            style={{ cursor: requestLoading ? "not-allowed" : "pointer" }}
+          >
+            Request
           </button>
-        </Link>
-        <button
-          className="btn app-primary-btn text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md"
-          onClick={() => sendRequest(groupId)}
-          disabled={requestLoading}
-          style={{ cursor: requestLoading ? "not-allowed" : "pointer" }}
-        >
-          Request
-        </button>
-        {/* <JoinGroupForm groupId={groupId} /> */}
+        )}
       </div>
     </div>
   );
