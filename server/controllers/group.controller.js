@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import GroupModel from "../models/group.model.js";
 import UserModel from "../models/user.model.js";
+import RequestModel from "../models/request.model.js";
 
 export async function createGroup(req, res) {
   try {
@@ -232,5 +233,36 @@ export const deleteGroup = async (req, res) => {
   } catch (error) {
     console.error("Error in deleteGroup controller:", error);
     res.status(500).json({ message: "Failed to delete the group" });
+  }
+};
+
+export const checkGroupMembership = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const userId = req.loggedInUser._id;
+
+    const group = await GroupModel.findById(groupId);
+    if (!group) {
+      return res.status(404).json({ message: 'Group not found' });
+    }
+
+    const isMember = group.members.includes(userId);
+    const isAdmin = group.admin.toString() === userId.toString();
+
+    // Check for pending request
+    const pendingRequest = await RequestModel.findOne({
+      group: groupId,
+      user: userId,
+      status: 'pending'
+    });
+
+    res.json({
+      isMember,
+      isAdmin,
+      hasPendingRequest: !!pendingRequest
+    });
+  } catch (error) {
+    console.error('Error checking group membership:', error);
+    res.status(500).json({ message: 'Internal server error' });
   }
 };

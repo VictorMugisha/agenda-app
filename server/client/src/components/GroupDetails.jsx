@@ -25,6 +25,7 @@ export default function GroupDetails({ groupId }) {
   const { isAuthenticated } = useAuth();
   const [isUserMemberOrAdmin, setIsUserMemberOrAdmin] = useState(false);
   const [isUserAdmin, setIsUserAdmin] = useState(false);
+  const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { deleteGroup, loading: deleteLoading, error: deleteError } = useDeleteGroup();
   const navigate = useNavigate();
@@ -45,6 +46,7 @@ export default function GroupDetails({ groupId }) {
           const data = await response.json();
           setIsUserMemberOrAdmin(data.isMember || data.isAdmin);
           setIsUserAdmin(data.isAdmin);
+          setHasPendingRequest(data.hasPendingRequest);
         } catch (error) {
           console.error("Error checking user membership:", error);
         }
@@ -118,6 +120,13 @@ export default function GroupDetails({ groupId }) {
               Open
             </button>
           </Link>
+        ) : hasPendingRequest ? (
+          <button
+            className="btn bg-yellow-200 text-yellow-800 py-2 px-6 rounded-lg shadow-md cursor-not-allowed"
+            disabled
+          >
+            Pending
+          </button>
         ) : (
           <button
             className="btn app-primary-btn text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md"
