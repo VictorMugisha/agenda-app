@@ -266,3 +266,78 @@ export const checkGroupMembership = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+export const getGroupRequests = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const userId = req.loggedInUser._id;
+
+    const group = await GroupModel.findById(groupId);
+    if (!group || group.admin.toString() !== userId.toString()) {
+      return res.status(403).json({ message: 'Not authorized to view requests for this group' });
+    }
+
+    const requests = await RequestModel.find({ group: groupId, status: 'pending' }).populate('user', 'firstName lastName username');
+    res.json(requests);
+  } catch (error) {
+    console.error('Error fetching group requests:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const handleJoinRequest = async (req, res) => {
+  try {
+    const { groupId, requestId } = req.params;
+    const { action } = req.body; // 'accept' or 'decline'
+    const userId = req.loggedInUser._id;
+
+    const group = await GroupModel.findById(groupId);
+    if (!group || group.admin.toString() !== userId.toString()) {
+      return res.status(403).json({ message: 'Not authorized to handle requests for this group' });
+    }
+
+    const request = await RequestModel.findById(requestId);
+    if (!request || request.group.toString() !== groupId) {
+      return res.status(404).json({ message: 'Request not found' });
+    }
+
+    if (action === 'accept') {
+      await GroupModel.findByIdAndUpdate(groupId, { $addToSet: { members: request.user } });
+      request.status = 'accepted';
+    } else if (action === 'decline') {
+      request.status = 'declined';
+    } else {
+      return res.status(400).json({ message: 'Invalid action' });
+    }
+
+    await request.save();
+    res.json({ message: `Request ${action}ed successfully` });
+  } catch (error) {
+    console.error('Error handling join request:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
+
+export const updateGroupDetails = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const { name, description, coverImg } = req.body;
+    const userId = req.loggedInUser._id;
+
+    const group = await GroupModel.findById(groupId);
+    if (!group || group.admin.toString() !== userId.toString()) {
+      return res.status(403).json({ message: 'Not authorized to update this group' });
+    }
+
+    const updatedGroup = await GroupModel.findByIdAndUpdate(
+      groupId,
+      { name, description, coverImg },
+      { new: true, runValidators: true }
+    );
+
+    res.json(updatedGroup);
+  } catch (error) {
+    console.error('Error updating group details:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};

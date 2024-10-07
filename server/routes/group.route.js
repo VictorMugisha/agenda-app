@@ -9,6 +9,9 @@ import {
   joinGroup,
   leaveGroup,
   checkGroupMembership,
+  getGroupRequests,
+  handleJoinRequest,
+  updateGroupDetails
 } from "../controllers/group.controller.js";
 
 const router = express.Router();
@@ -26,5 +29,8 @@ router.get('/my-groups', getMyGroups);
 router.post('/:groupId/join', joinGroup);
 router.post('/:groupId/leave', leaveGroup);
 router.delete('/:groupId', deleteGroup);
+router.get('/:groupId/requests', getGroupRequests);
+router.put('/:groupId/requests/:requestId', handleJoinRequest);
+router.put('/:groupId', updateGroupDetails);
 
 export default router;

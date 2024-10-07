@@ -18,9 +18,12 @@ import {
   Button,
   useDisclosure,
 } from "@chakra-ui/react";
+import GroupRequests from './GroupRequests';
+import EditGroupForm from './EditGroupForm';
 
 export default function GroupDetails({ groupId }) {
-  const { group, loading, error, fetchGroupDetails } = useGroupDetails(groupId);
+  const { group: initialGroup, loading, error, fetchGroupDetails } = useGroupDetails(groupId);
+  const [group, setGroup] = useState(null);
   const { loading: requestLoading, sendRequest } = useSendRequest();
   const { isAuthenticated } = useAuth();
   const [isUserMemberOrAdmin, setIsUserMemberOrAdmin] = useState(false);
@@ -29,10 +32,17 @@ export default function GroupDetails({ groupId }) {
   const { isOpen, onOpen, onClose } = useDisclosure();
   const { deleteGroup, loading: deleteLoading, error: deleteError } = useDeleteGroup();
   const navigate = useNavigate();
+  const [showEditForm, setShowEditForm] = useState(false);
 
   useEffect(() => {
     fetchGroupDetails();
   }, [fetchGroupDetails]);
+
+  useEffect(() => {
+    if (initialGroup) {
+      setGroup(initialGroup);
+    }
+  }, [initialGroup]);
 
   useEffect(() => {
     const checkUserMembership = async () => {
@@ -62,6 +72,11 @@ export default function GroupDetails({ groupId }) {
       onClose();
       navigate("/app/mygroups");
     }
+  };
+
+  const handleUpdateGroup = (updatedGroup) => {
+    setGroup(updatedGroup);
+    setShowEditForm(false);
   };
 
   if (loading) return <Loading />;
@@ -166,6 +181,22 @@ export default function GroupDetails({ groupId }) {
         </ModalContent>
       </Modal>
       {deleteError && <p className="text-red-500 mt-4">{deleteError}</p>}
+
+      {isUserAdmin && (
+        <>
+          <button onClick={() => setShowEditForm(true)}>Edit Group</button>
+          <GroupRequests groupId={groupId} />
+        </>
+      )}
+
+      {showEditForm && (
+        <Modal isOpen={showEditForm} onClose={() => setShowEditForm(false)}>
+          <EditGroupForm 
+            group={group} 
+            onUpdate={handleUpdateGroup}
+          />
+        </Modal>
+      )}
     </div>
   );
 }
