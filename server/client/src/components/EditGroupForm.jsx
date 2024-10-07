@@ -1,56 +1,95 @@
 import PropTypes from "prop-types";
 import { useState } from "react";
-import { getAuthToken } from "../utils/utils";
+import { useEditGroup } from "../hooks/useEditGroup";
 
 const EditGroupForm = ({ group, onUpdate }) => {
-  const [name, setName] = useState(group.name);
-  const [description, setDescription] = useState(group.description);
-  const [coverImg, setCoverImg] = useState(group.coverImg);
-  const [error, setError] = useState(null);
+  const [formData, setFormData] = useState({
+    name: group.name,
+    description: group.description,
+    coverImg: group.coverImg,
+  });
+  const { editGroup, loading, error, uploadingImage } = useEditGroup(group._id);
+
+  const handleChange = (e) => {
+    const { name, value, files } = e.target;
+    setFormData({
+      ...formData,
+      [name]: files ? files[0] : value,
+    });
+  };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      const response = await fetch(`/api/groups/${group._id}`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`,
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ name, description, coverImg }),
-      });
-      if (!response.ok) throw new Error("Failed to update group");
-      const updatedGroup = await response.json();
+    const updatedGroup = await editGroup(formData);
+    if (updatedGroup) {
       onUpdate(updatedGroup);
-    } catch (err) {
-      setError(err.message);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit}>
-      <input
-        type="text"
-        value={name}
-        onChange={(e) => setName(e.target.value)}
-        placeholder="Group Name"
-        required
-      />
-      <textarea
-        value={description}
-        onChange={(e) => setDescription(e.target.value)}
-        placeholder="Group Description"
-        required
-      />
-      <input
-        type="text"
-        value={coverImg}
-        onChange={(e) => setCoverImg(e.target.value)}
-        placeholder="Cover Image URL"
-      />
-      <button type="submit">Update Group</button>
-      {error && <p>Error: {error}</p>}
-    </form>
+    <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-md">
+      <h1 className="text-2xl font-semibold mb-4 text-center">
+        Edit Group
+      </h1>
+
+      {error && <p className="text-red-500 mb-4 text-center">{error}</p>}
+
+      <form onSubmit={handleSubmit}>
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">Group Name</label>
+          <input
+            type="text"
+            name="name"
+            value={formData.name}
+            onChange={handleChange}
+            className="input input-bordered w-full"
+            placeholder="Enter group name"
+            required
+          />
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">
+            Description
+          </label>
+          <textarea
+            name="description"
+            value={formData.description}
+            onChange={handleChange}
+            className="textarea textarea-bordered w-full"
+            placeholder="Enter group description"
+          ></textarea>
+        </div>
+
+        <div className="mb-4">
+          <label className="block text-sm font-medium mb-1">
+            Cover Image (optional)
+          </label>
+          <input
+            type="file"
+            name="coverImg"
+            accept="image/*"
+            onChange={handleChange}
+            className="file-input file-input-bordered w-full"
+          />
+          {uploadingImage && (
+            <p className="text-blue-500 text-center mt-2">
+              Uploading image...
+            </p>
+          )}
+        </div>
+
+        <div className="text-center">
+          <button
+            type="submit"
+            className="btn w-full app-primary-btn"
+            disabled={loading || uploadingImage}
+          >
+            {loading ? "Updating..." : "Update Group"}
+          </button>
+        </div>
+      </form>
+    </div>
   );
 };
 

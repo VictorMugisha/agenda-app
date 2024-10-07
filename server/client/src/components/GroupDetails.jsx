@@ -123,7 +123,7 @@ export default function GroupDetails({ groupId }) {
         </div>
       </div>
 
-      <div className="flex justify-center space-x-4">
+      <div className="flex justify-center space-x-4 mb-6">
         <Link to="..">
           <button className="btn bg-gray-200 text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md">
             Cancel
@@ -153,14 +153,24 @@ export default function GroupDetails({ groupId }) {
           </button>
         )}
         {isUserAdmin && (
-          <button
-            className="btn bg-red-500 text-white hover:bg-red-600 py-2 px-6 rounded-lg shadow-md"
-            onClick={onOpen}
-          >
-            Delete Group
-          </button>
+          <>
+            <button
+              className="btn bg-blue-500 text-white hover:bg-blue-600 py-2 px-6 rounded-lg shadow-md"
+              onClick={() => setShowEditForm(true)}
+            >
+              Edit Group
+            </button>
+            <button
+              className="btn bg-red-500 text-white hover:bg-red-600 py-2 px-6 rounded-lg shadow-md"
+              onClick={onOpen}
+            >
+              Delete Group
+            </button>
+          </>
         )}
       </div>
+
+      {isUserAdmin && <GroupRequests groupId={groupId} />}
 
       <Modal isOpen={isOpen} onClose={onClose}>
         <ModalOverlay />
@@ -182,21 +192,18 @@ export default function GroupDetails({ groupId }) {
       </Modal>
       {deleteError && <p className="text-red-500 mt-4">{deleteError}</p>}
 
-      {isUserAdmin && (
-        <>
-          <button onClick={() => setShowEditForm(true)}>Edit Group</button>
-          <GroupRequests groupId={groupId} />
-        </>
-      )}
-
-      {showEditForm && (
-        <Modal isOpen={showEditForm} onClose={() => setShowEditForm(false)}>
-          <EditGroupForm 
-            group={group} 
-            onUpdate={handleUpdateGroup}
-          />
-        </Modal>
-      )}
+      <Modal isOpen={showEditForm} onClose={() => setShowEditForm(false)}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalCloseButton />
+          <ModalBody>
+            <EditGroupForm 
+              group={group} 
+              onUpdate={handleUpdateGroup}
+            />
+          </ModalBody>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
