@@ -160,3 +160,26 @@ export async function updateProfile(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export const getCurrentUser = async (req, res) => {
+  try {
+    // The user information should be available in req.loggedInUser
+    // thanks to the protect middleware
+    const user = req.loggedInUser;
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json({
+      _id: user._id,
+      firstName: user.firstName,
+      lastName: user.lastName,
+      username: user.username,
+      email: user.email,
+    });
+  } catch (error) {
+    console.error("Error fetching current user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
