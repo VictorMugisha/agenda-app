@@ -4,7 +4,11 @@ import { IoIosNotifications } from "react-icons/io";
 import { MdAddCircle } from "react-icons/md";
 import { FaUser } from "react-icons/fa";
 import { NavLink } from "react-router-dom";
+import { useUnreadNotifications } from "../hooks/useUnreadNotifications";
+
 export default function Footer() {
+  const unreadCount = useUnreadNotifications();
+
   return (
     <footer className="w-full py-2 fixed bottom-0 bg-app-primary">
       <menu className="flex items-center justify-evenly">
@@ -29,7 +33,14 @@ export default function Footer() {
           }
           to="notifications"
         >
-          <IoIosNotifications className="text-2xl" />
+          <div className="relative">
+            <IoIosNotifications className="text-2xl" />
+            {unreadCount > 0 && (
+              <span className="absolute -top-2 -right-2 bg-red-500 text-white text-xs rounded-full w-5 h-5 flex items-center justify-center">
+                {unreadCount}
+              </span>
+            )}
+          </div>
           <span className="text-xs">Notification</span>
         </NavLink>
 

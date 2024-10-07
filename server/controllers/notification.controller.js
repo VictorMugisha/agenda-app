@@ -35,3 +35,17 @@ export async function markNotificationAsRead(req, res) {
     return res.status(500).json({ message: "Internal server error" });
   }
 }
+
+export const getUnreadNotificationsCount = async (req, res) => {
+  try {
+    const userId = req.loggedInUser._id;
+    const count = await NotificationModel.countDocuments({ 
+      recipients: userId, 
+      isRead: false 
+    });
+    res.json({ count });
+  } catch (error) {
+    console.error('Error getting unread notifications count:', error);
+    res.status(500).json({ message: 'Internal server error' });
+  }
+};
