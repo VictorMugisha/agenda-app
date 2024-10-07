@@ -29,7 +29,7 @@ export default function MyGroups() {
         value={groupSearch}
         onChange={(e) => setGroupSearch(e.target.value)}
       />
-      <div className="grid md:grid-cols-3 gap-4">
+      <div className="grid md:grid-cols-3 gap-4 mb-20">
         {filteredGroups.map((group) => (
           <GroupCard key={group._id} group={group} isMyGroup={true} />
         ))}
