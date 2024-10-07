@@ -57,6 +57,7 @@ export async function createGroup(req, res) {
 }
 
 export async function getAllGroups(req, res) {
+  console.log("Received request at:", req.originalUrl);
   try {
     const allGroups = await GroupModel.find()
       .populate({

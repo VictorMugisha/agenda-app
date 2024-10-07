@@ -9,6 +9,7 @@ import authRoutes from "./routes/auth.route.js";
 import groupRoutes from "./routes/group.route.js";
 import requestRoutes from "./routes/request.route.js";
 import protectedRoute from "./middlewares/protect.middleware.js";
+import messageRoutes from "./routes/message.route.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -34,6 +35,7 @@ app.use("/api/auth", authRoutes);
 app.use("/api/users", protectedRoute, userRoutes);
 app.use("/api/groups", protectedRoute, groupRoutes);
 app.use("/request", protectedRoute, requestRoutes);
+app.use("/api/messages", messageRoutes);
 
 // Serve the frontend client (React app)
 app.use(express.static(path.join(__dirname, "/client/dist")));

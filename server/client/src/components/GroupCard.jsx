@@ -2,7 +2,7 @@ import PropTypes from "prop-types";
 import { Link } from "react-router-dom";
 // import JoinGroupForm from "./JoinGroupForm";
 
-export default function GroupCard({ group }) {
+export default function GroupCard({ group, isMyGroup }) {
   return (
     <div className="card shadow-md bg-app-primary">
       <div className="card-body">
@@ -12,16 +12,14 @@ export default function GroupCard({ group }) {
           Admin: <span className="font-semibold">{group.admin.firstName}</span>
         </h3>
         <div className="card-actions justify-end">
-          <Link to={`group/${group._id}`}>
+          <Link to={`/app/group/${group._id}`}>
             <button className="btn w-32 app-secondary-btn">View</button>
           </Link>
-
-          <Link to={`group-chat`}>
-            <button className="btn w-32 app-primary-btn">Join</button>
-          </Link>
-
-          {/* Join Group Form */}
-          {/* <JoinGroupForm groupId={group._id} /> */}
+          {isMyGroup && (
+            <Link to={`/app/group/${group._id}/chat`}>
+              <button className="btn w-32 app-primary-btn">Chat</button>
+            </Link>
+          )}
         </div>
       </div>
     </div>
@@ -39,4 +37,5 @@ GroupCard.propTypes = {
       firstName: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
+  isMyGroup: PropTypes.bool.isRequired,
 };

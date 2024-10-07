@@ -40,6 +40,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="group-chat" element={<GroupChat />} />
               <Route path="group/:id" element={<GroupDetailsPage />} />
               <Route path="profile" element={<Profile />} />
+              <Route path="group/:groupId/chat" element={<GroupChat />} />
             </Route>
             <Route path="*" element={<h1>Not Found</h1>} />
           </Routes>

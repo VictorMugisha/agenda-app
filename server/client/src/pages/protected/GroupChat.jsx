@@ -1,106 +1,54 @@
-import { IoIosHeart } from "react-icons/io";
-import { FaComment } from "react-icons/fa";
+import { useState, useEffect } from "react";
+import { useParams } from "react-router-dom";
+import { useGroupChat } from "../../hooks/useGroupChat";
+import Loading from "../../components/Loading";
 
 export default function GroupChat() {
+  const { groupId } = useParams();
+  const { messages, loading, error, sendMessage } = useGroupChat(groupId);
+  const [newMessage, setNewMessage] = useState("");
+
+  useEffect(() => {
+    // Scroll to bottom of chat
+    const chatContainer = document.getElementById("chat-container");
+    if (chatContainer) {
+      chatContainer.scrollTop = chatContainer.scrollHeight;
+    }
+  }, [messages]);
+
+  const handleSendMessage = (e) => {
+    e.preventDefault();
+    if (newMessage.trim()) {
+      sendMessage(newMessage);
+      setNewMessage("");
+    }
+  };
+
+  if (loading) return <Loading />;
+  if (error) return <div className="text-center text-red-500">{error}</div>;
+
   return (
-    <div className="mt-4 mb-16">
-      <h1 className="text-2xl font-semibold pb-3">Announcements</h1>
-
-      <div className="flex flex-col gap-5 mb-8">
-        <div className="flex flex-col gap-4 bg-white shadow-md rounded-lg py-6 px-3">
-          <div className="flex items-center justify-start gap-3">
-            <img
-              src="https://res.cloudinary.com/demo/image/facebook/s--ZuJGmG2B--/65646572251"
-              alt="Profile Picture"
-              className="size-16 rounded-full"
-            />
-
-            <div>
-              <h3 className="font-bold">John Doe</h3>
-              <p className="text-sm text-gray-500">2 hours ago</p>
-            </div>
+    <div className="flex flex-col h-[calc(100vh-64px)]">
+      <div id="chat-container" className="flex-1 overflow-y-auto p-4">
+        {messages.map((message) => (
+          <div key={message._id} className="mb-4">
+            <p className="font-bold">{message.sender.username}</p>
+            <p>{message.content}</p>
           </div>
-
-          <div className="flex flex-col gap-3">
-            <p className="text-gray-700">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-              tincidunt, nisl nec molestie commodo, nisl nisl aliquet nisl, nec
-              aliquet nisl. Lorem ipsum dolor sit amet, consectetur adipiscing
-              elit. Sed tincidunt, nisl nec molestie commodo, nisl nisl aliquet
-              nisl, nec aliquet nisl.
-            </p>
-
-            <div className="flex flex-col gap-4">
-              <img
-                src="https://res-console.cloudinary.com/victormugisha/thumbnails/v1/image/upload/v1725990360/c2FtcGxlcy9jb2ZmZWU=/drilldown"
-                alt="Post Image"
-                className="w-full h-64 object-cover rounded-lg"
-              />
-
-              <div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <IoIosHeart className="text-red-500 text-lg" />
-                    <p className="text-xs text-gray-500">2</p>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <FaComment className="text-gray-500 text-lg" />
-                    <p className="text-xs text-gray-500">2</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-        
-        <div className="flex flex-col gap-4 bg-white shadow-md rounded-lg py-6 px-3">
-          <div className="flex items-center justify-start gap-3">
-            <img
-              src="https://res.cloudinary.com/demo/image/facebook/s--ZuJGmG2B--/65646572251"
-              alt="Profile Picture"
-              className="size-16 rounded-full"
-            />
-
-            <div>
-              <h3 className="font-bold">John Doe</h3>
-              <p className="text-sm text-gray-500">2 hours ago</p>
-            </div>
-          </div>
-
-          <div className="flex flex-col gap-3">
-            <p className="text-gray-700">
-              Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed
-              tincidunt, nisl nec molestie commodo, nisl nisl aliquet nisl, nec
-              aliquet nisl. Lorem ipsum dolor sit amet, consectetur adipiscing
-              elit. Sed tincidunt, nisl nec molestie commodo, nisl nisl aliquet
-              nisl, nec aliquet nisl.
-            </p>
-
-            <div className="flex flex-col gap-4">
-              <img
-                src="https://res-console.cloudinary.com/victormugisha/thumbnails/v1/image/upload/v1725990360/c2FtcGxlcy9jb2ZmZWU=/drilldown"
-                alt="Post Image"
-                className="w-full h-64 object-cover rounded-lg"
-              />
-
-              <div>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1">
-                    <IoIosHeart className="text-red-500 text-lg" />
-                    <p className="text-xs text-gray-500">2</p>
-                  </div>
-
-                  <div className="flex items-center gap-1">
-                    <FaComment className="text-gray-500 text-lg" />
-                    <p className="text-xs text-gray-500">2</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+        ))}
       </div>
+      <form onSubmit={handleSendMessage} className="p-4 bg-white">
+        <div className="flex">
+          <input
+            type="text"
+            value={newMessage}
+            onChange={(e) => setNewMessage(e.target.value)}
+            className="flex-1 input input-bordered"
+            placeholder="Type a message..."
+          />
+          <button type="submit" className="btn btn-primary ml-2">Send</button>
+        </div>
+      </form>
     </div>
   );
 }
