@@ -7,7 +7,7 @@ import { ArrowLeftIcon } from "@heroicons/react/24/solid";
 
 export default function GroupChat() {
   const { groupId } = useParams();
-  const { group, messages, loading, error, sendMessage, deleteMessage, currentUserId } = useGroupChat(groupId);
+  const { group, messages, loading, error, sendMessage, currentUserId } = useGroupChat(groupId);
   const [newMessage, setNewMessage] = useState("");
   const chatContainerRef = useRef(null);
 
@@ -60,14 +60,6 @@ export default function GroupChat() {
                 {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
               </p>
             </div>
-            {message.sender._id === currentUserId && (
-              <button 
-                className="ml-auto bg-red-500 text-white rounded-lg p-1" 
-                onClick={() => deleteMessage(message._id)}
-              >
-                Delete
-              </button>
-            )}
           </div>
         ))}
       </div>

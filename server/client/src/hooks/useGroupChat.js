@@ -87,43 +87,12 @@ export const useGroupChat = (groupId) => {
     }
   };
 
-  const deleteMessage = async (messageId) => {
-    try {
-      const response = await fetch(`/api/messages/${messageId}`, {
-        method: "DELETE",
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`,
-        },
-      });
-      if (!response.ok) {
-        throw new Error("Failed to delete message");
-      }
-      setMessages(messages.filter((message) => message._id !== messageId));
-      toast({
-        title: "Message deleted",
-        status: "success",
-        duration: 2000,
-        isClosable: true,
-      });
-    } catch (err) {
-      setError("Failed to delete message");
-      toast({
-        title: "Error",
-        description: "Failed to delete message",
-        status: "error",
-        duration: 3000,
-        isClosable: true,
-      });
-    }
-  };
-
   return {
     group,
     messages,
     loading,
     error,
     sendMessage,
-    deleteMessage,
     currentUserId: currentUser?._id,
   };
 };
