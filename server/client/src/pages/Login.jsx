@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import useLogin from "../hooks/useLogin";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // Add this import
 
 export default function Login() {
   const [formData, setFormData] = useState({
@@ -9,6 +10,7 @@ export default function Login() {
   });
   const [errorMessage, setErrorMessage] = useState("");
   const { loading, login } = useLogin();
+  const [showPassword, setShowPassword] = useState(false); // Add this state
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -24,8 +26,10 @@ export default function Login() {
     }
   };
 
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 py-4 px-2">
       <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-md">
         <h2 className="text-2xl font-semibold mb-4 text-center">Login</h2>
 
@@ -47,17 +51,24 @@ export default function Login() {
             />
           </div>
 
-          <div className="mb-4">
+          <div className="mb-4 relative">
             <label className="block text-sm font-medium mb-1">Password</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="input input-bordered w-full"
+              className="input input-bordered w-full pr-10"
               placeholder="Enter your password"
               required
             />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 mt-6"
+              onClick={togglePasswordVisibility}
+            >
+              {showPassword ? <FiEyeOff /> : <FiEye />}
+            </button>
           </div>
 
           <div className="text-center">

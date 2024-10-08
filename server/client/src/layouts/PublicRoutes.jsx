@@ -6,7 +6,7 @@ export default function PublicRoutes() {
   return isAuthenticated ? (
     <Navigate to="/app" replace />
   ) : (
-    <main className="flex flex-col min-h-screen justify-center mx-5">
+    <main className="flex flex-col min-h-screen justify-center">
       <Outlet />
     </main>
   );

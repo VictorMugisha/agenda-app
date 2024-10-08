@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { CLOUD_NAME, UPLOAD_PRESET } from "../constants/constants";
+import { FiEye, FiEyeOff } from "react-icons/fi"; // Add this import
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -17,6 +18,9 @@ export default function Register() {
   const [uploadingImage, setUploadingImage] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
   const navigate = useNavigate();
+
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -88,8 +92,11 @@ export default function Register() {
     }
   };
 
+  const togglePasswordVisibility = () => setShowPassword(!showPassword);
+  const toggleConfirmPasswordVisibility = () => setShowConfirmPassword(!showConfirmPassword);
+
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4">
+    <div className="flex justify-center items-center min-h-screen bg-gray-100 py-4 px-2">
       <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-md">
         <h2 className="text-2xl font-semibold mb-4 text-center">Register</h2>
 
@@ -155,33 +162,47 @@ export default function Register() {
           </div>
 
           {/* Password */}
-          <div className="mb-4">
+          <div className="mb-4 relative">
             <label className="block text-sm font-medium mb-1">Password</label>
             <input
-              type="password"
+              type={showPassword ? "text" : "password"}
               name="password"
               value={formData.password}
               onChange={handleChange}
-              className="input input-bordered w-full"
+              className="input input-bordered w-full pr-10"
               placeholder="Enter your password"
               required
             />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 mt-6"
+              onClick={togglePasswordVisibility}
+            >
+              {showPassword ? <FiEyeOff /> : <FiEye />}
+            </button>
           </div>
 
           {/* Confirm Password */}
-          <div className="mb-4">
+          <div className="mb-4 relative">
             <label className="block text-sm font-medium mb-1">
               Confirm Password
             </label>
             <input
-              type="password"
+              type={showConfirmPassword ? "text" : "password"}
               name="confirmPassword"
               value={formData.confirmPassword}
               onChange={handleChange}
-              className="input input-bordered w-full"
+              className="input input-bordered w-full pr-10"
               placeholder="Confirm your password"
               required
             />
+            <button
+              type="button"
+              className="absolute inset-y-0 right-0 pr-3 flex items-center text-sm leading-5 mt-6"
+              onClick={toggleConfirmPasswordVisibility}
+            >
+              {showConfirmPassword ? <FiEyeOff /> : <FiEye />}
+            </button>
           </div>
 
           {/* Profile Picture */}
