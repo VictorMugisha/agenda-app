@@ -27,14 +27,16 @@ export default function AvailableGroups({ searchQuery }) {
     );
 
   return (
-    <div className="grid md:grid-cols-3 gap-4 max-h-[60vh] overflow-y-auto scrollbar-hide">
-      {filteredGroups.map((group) => (
-        <GroupCard 
-          key={group._id} 
-          group={group} 
-          isMyGroup={myGroups.some(myGroup => myGroup._id === group._id)}
-        />
-      ))}
+    <div className="h-full overflow-y-auto scrollbar-hide">
+      <div className="grid md:grid-cols-3 gap-4 pb-4">
+        {filteredGroups.map((group) => (
+          <GroupCard 
+            key={group._id} 
+            group={group} 
+            isMyGroup={myGroups.some(myGroup => myGroup._id === group._id)}
+          />
+        ))}
+      </div>
     </div>
   );
 }
