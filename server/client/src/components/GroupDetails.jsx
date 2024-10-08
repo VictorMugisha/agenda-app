@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useGroupDetails, useDeleteGroup } from "../hooks/index";
 import { useAuth } from "../hooks/useAuth";
+import { useLeaveGroup } from "../hooks/useLeaveGroup"; 
 import Loading from "../components/Loading";
 import PropTypes from "prop-types";
 import { formatDistanceToNow } from "date-fns";
@@ -32,6 +33,7 @@ export default function GroupDetails({ groupId }) {
   const { deleteGroup, loading: deleteLoading, error: deleteError } = useDeleteGroup();
   const navigate = useNavigate();
   const [showEditForm, setShowEditForm] = useState(false);
+  const { leaveGroup, loading: leaveLoading } = useLeaveGroup(); 
 
   useEffect(() => {
     fetchGroupDetails();
@@ -75,6 +77,13 @@ export default function GroupDetails({ groupId }) {
     fetchGroupDetails();
     
     setShowEditForm(false);
+  };
+
+  const handleLeaveGroup = async () => {
+    const success = await leaveGroup(groupId);
+    if (success) {
+      fetchGroupDetails();
+    }
   };
 
   if (loading) return <Loading />;
@@ -167,6 +176,15 @@ export default function GroupDetails({ groupId }) {
               Delete Group
             </button>
           </div>
+        )}
+        {isUserMemberOrAdmin && (
+          <button
+            className="btn bg-red-500 text-white hover:bg-red-600 py-2 px-6 rounded-lg shadow-md w-full"
+            onClick={handleLeaveGroup}
+            disabled={leaveLoading}
+          >
+            {leaveLoading ? "Leaving..." : "Leave Group"}
+          </button>
         )}
       </div>
 
