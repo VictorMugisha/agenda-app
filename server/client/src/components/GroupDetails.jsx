@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { useGroupDetails, useDeleteGroup } from "../hooks/index";
 import { useAuth } from "../hooks/useAuth";
-import { useLeaveGroup } from "../hooks/useLeaveGroup"; 
+import { useLeaveGroup } from "../hooks/useLeaveGroup";
 import Loading from "../components/Loading";
 import PropTypes from "prop-types";
 import { formatDistanceToNow } from "date-fns";
@@ -19,21 +19,26 @@ import {
   Button,
   useDisclosure,
 } from "@chakra-ui/react";
-import GroupRequests from './GroupRequests';
-import EditGroupForm from './EditGroupForm';
+import GroupRequests from "./GroupRequests";
+import EditGroupForm from "./EditGroupForm";
 
 export default function GroupDetails({ groupId }) {
-  const { group, setGroup, loading, error, fetchGroupDetails } = useGroupDetails(groupId);
+  const { group, setGroup, loading, error, fetchGroupDetails } =
+    useGroupDetails(groupId);
   const { loading: requestLoading, sendRequest } = useSendRequest();
   const { isAuthenticated } = useAuth();
   const [isUserMemberOrAdmin, setIsUserMemberOrAdmin] = useState(false);
   const [isUserAdmin, setIsUserAdmin] = useState(false);
   const [hasPendingRequest, setHasPendingRequest] = useState(false);
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { deleteGroup, loading: deleteLoading, error: deleteError } = useDeleteGroup();
+  const {
+    deleteGroup,
+    loading: deleteLoading,
+    error: deleteError,
+  } = useDeleteGroup();
   const navigate = useNavigate();
   const [showEditForm, setShowEditForm] = useState(false);
-  const { leaveGroup, loading: leaveLoading } = useLeaveGroup(); 
+  const { leaveGroup, loading: leaveLoading } = useLeaveGroup();
 
   useEffect(() => {
     fetchGroupDetails();
@@ -70,12 +75,12 @@ export default function GroupDetails({ groupId }) {
   };
 
   const handleUpdateGroup = (updatedGroup) => {
-    setGroup(prevGroup => ({
+    setGroup((prevGroup) => ({
       ...prevGroup,
-      ...updatedGroup
+      ...updatedGroup,
     }));
     fetchGroupDetails();
-    
+
     setShowEditForm(false);
   };
 
@@ -115,7 +120,12 @@ export default function GroupDetails({ groupId }) {
           </p>
           <p>
             <span className="font-semibold">Members:</span>{" "}
-            {group.members.length} Members
+            <Link
+              to={`/app/group/${groupId}/members`}
+              className="text-blue-500 hover:underline"
+            >
+              {group.members.length} Members
+            </Link>
           </p>
           <p>
             <span className="font-semibold">Created:</span>{" "}
@@ -177,7 +187,7 @@ export default function GroupDetails({ groupId }) {
             </button>
           </div>
         )}
-        {isUserMemberOrAdmin && (
+        {isUserMemberOrAdmin && !isUserAdmin && (
           <button
             className="btn bg-red-500 text-white hover:bg-red-600 py-2 px-6 rounded-lg shadow-md w-full"
             onClick={handleLeaveGroup}
@@ -196,13 +206,18 @@ export default function GroupDetails({ groupId }) {
           <ModalHeader>Confirm Delete Group</ModalHeader>
           <ModalCloseButton />
           <ModalBody>
-            Are you sure you want to delete this group? This action cannot be undone.
+            Are you sure you want to delete this group? This action cannot be
+            undone.
           </ModalBody>
           <ModalFooter>
             <Button colorScheme="gray" mr={3} onClick={onClose}>
               Cancel
             </Button>
-            <Button colorScheme="red" onClick={handleDeleteGroup} isLoading={deleteLoading}>
+            <Button
+              colorScheme="red"
+              onClick={handleDeleteGroup}
+              isLoading={deleteLoading}
+            >
               Delete
             </Button>
           </ModalFooter>
@@ -215,10 +230,7 @@ export default function GroupDetails({ groupId }) {
         <ModalContent>
           <ModalCloseButton />
           <ModalBody>
-            <EditGroupForm 
-              group={group} 
-              onUpdate={handleUpdateGroup}
-            />
+            <EditGroupForm group={group} onUpdate={handleUpdateGroup} />
           </ModalBody>
         </ModalContent>
       </Modal>

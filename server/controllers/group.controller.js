@@ -79,15 +79,15 @@ export async function getMyGroups(req, res) {
   try {
     const userId = req.loggedInUser._id;
     const myGroups = await GroupModel.find({ members: userId })
-      .populate('admin', 'firstName lastName username')
-      .select('-password');
+      .populate("admin", "firstName lastName username")
+      .select("-password");
 
     res.status(200).json(myGroups);
   } catch (error) {
-    console.error('Error in getMyGroups controller:', error);
-    res.status(500).json({ message: 'Failed to fetch your groups' });
+    console.error("Error in getMyGroups controller:", error);
+    res.status(500).json({ message: "Failed to fetch your groups" });
   }
-};
+}
 
 export async function getSingleGroup(req, res) {
   try {
@@ -224,7 +224,9 @@ export const deleteGroup = async (req, res) => {
     }
 
     if (group.admin.toString() !== userId.toString()) {
-      return res.status(403).json({ message: "Only the group admin can delete the group" });
+      return res
+        .status(403)
+        .json({ message: "Only the group admin can delete the group" });
     }
 
     await GroupModel.findByIdAndDelete(groupId);
@@ -243,7 +245,7 @@ export const checkGroupMembership = async (req, res) => {
 
     const group = await GroupModel.findById(groupId);
     if (!group) {
-      return res.status(404).json({ message: 'Group not found' });
+      return res.status(404).json({ message: "Group not found" });
     }
 
     const isMember = group.members.includes(userId);
@@ -253,17 +255,17 @@ export const checkGroupMembership = async (req, res) => {
     const pendingRequest = await RequestModel.findOne({
       group: groupId,
       user: userId,
-      status: 'pending'
+      status: "pending",
     });
 
     res.json({
       isMember,
       isAdmin,
-      hasPendingRequest: !!pendingRequest
+      hasPendingRequest: !!pendingRequest,
     });
   } catch (error) {
-    console.error('Error checking group membership:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error checking group membership:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -274,14 +276,19 @@ export const getGroupRequests = async (req, res) => {
 
     const group = await GroupModel.findById(groupId);
     if (!group || group.admin.toString() !== userId.toString()) {
-      return res.status(403).json({ message: 'Not authorized to view requests for this group' });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to view requests for this group" });
     }
 
-    const requests = await RequestModel.find({ group: groupId, status: 'pending' }).populate('user', 'firstName lastName username');
+    const requests = await RequestModel.find({
+      group: groupId,
+      status: "pending",
+    }).populate("user", "firstName lastName username");
     res.json(requests);
   } catch (error) {
-    console.error('Error fetching group requests:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error fetching group requests:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -292,28 +299,32 @@ export const handleJoinRequest = async (req, res) => {
 
     const group = await GroupModel.findById(groupId);
     if (!group || group.admin.toString() !== userId.toString()) {
-      return res.status(403).json({ message: 'Not authorized to handle requests for this group' });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to handle requests for this group" });
     }
 
     const request = await RequestModel.findById(requestId);
     if (!request || request.group.toString() !== groupId) {
-      return res.status(404).json({ message: 'Request not found' });
+      return res.status(404).json({ message: "Request not found" });
     }
 
-    if (action === 'accept') {
-      await GroupModel.findByIdAndUpdate(groupId, { $addToSet: { members: request.user } });
-      request.status = 'accepted';
-    } else if (action === 'reject') {
-      request.status = 'rejected';
+    if (action === "accept") {
+      await GroupModel.findByIdAndUpdate(groupId, {
+        $addToSet: { members: request.user },
+      });
+      request.status = "accepted";
+    } else if (action === "reject") {
+      request.status = "rejected";
     } else {
-      return res.status(400).json({ message: 'Invalid action' });
+      return res.status(400).json({ message: "Invalid action" });
     }
 
     await request.save();
     res.json({ message: `Request ${action}ed successfully` });
   } catch (error) {
-    console.error('Error handling join request:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error handling join request:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };
 
@@ -325,7 +336,9 @@ export const updateGroupDetails = async (req, res) => {
 
     const group = await GroupModel.findById(groupId);
     if (!group || group.admin.toString() !== userId.toString()) {
-      return res.status(403).json({ message: 'Not authorized to update this group' });
+      return res
+        .status(403)
+        .json({ message: "Not authorized to update this group" });
     }
 
     const updatedGroup = await GroupModel.findByIdAndUpdate(
@@ -336,7 +349,43 @@ export const updateGroupDetails = async (req, res) => {
 
     res.json(updatedGroup);
   } catch (error) {
-    console.error('Error updating group details:', error);
-    res.status(500).json({ message: 'Internal server error' });
+    console.error("Error updating group details:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getGroupMembers = async (req, res) => {
+  try {
+    const { groupId } = req.params;
+    const userId = req.loggedInUser._id;
+
+    const group = await GroupModel.findById(groupId).populate({
+      path: "members",
+      select: "-password",
+    });
+
+    if (!group) {
+      return res.status(404).json({ message: "Group not found" });
+    }
+
+    if (
+      !group.members.some(
+        (member) => member._id.toString() === userId.toString()
+      )
+    ) {
+      return res.status(403).json({
+        message: "You must be a member of the group to view its members",
+      });
+    }
+
+    const membersWithAdminStatus = group.members.map((member) => ({
+      ...member.toObject(),
+      isAdmin: group.admin.toString() === member._id.toString(),
+    }));
+
+    res.status(200).json(membersWithAdminStatus);
+  } catch (error) {
+    console.error("Error fetching group members:", error);
+    res.status(500).json({ message: "Internal server error" });
   }
 };

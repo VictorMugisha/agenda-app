@@ -20,6 +20,7 @@ import GroupDetailsPage from "./pages/protected/GroupDetailsPage.jsx";
 import CreateGroup from "./pages/protected/CreateGroup.jsx";
 import customTheme from "./chakra/theme.js";
 import GroupChat from "./pages/protected/GroupChat.jsx";
+import GroupMembers from "./pages/protected/GroupMembers.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -40,6 +41,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="group/:id" element={<GroupDetailsPage />} />
               <Route path="profile" element={<Profile />} />
               <Route path="group/:groupId/chat" element={<GroupChat />} />
+              <Route path="group/:groupId/members" element={<GroupMembers />} />
             </Route>
             <Route path="*" element={<h1>Not Found</h1>} />
           </Routes>

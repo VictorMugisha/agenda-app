@@ -11,7 +11,8 @@ import {
   checkGroupMembership,
   getGroupRequests,
   handleJoinRequest,
-  updateGroupDetails
+  updateGroupDetails,
+  getGroupMembers
 } from "../controllers/group.controller.js";
 
 const router = express.Router();
@@ -32,5 +33,6 @@ router.delete('/:groupId', deleteGroup);
 router.get('/:groupId/requests', getGroupRequests);
 router.post('/:groupId/requests/:requestId/:action', handleJoinRequest);
 router.put('/:groupId', updateGroupDetails);
+router.get('/:groupId/members', getGroupMembers);
 
 export default router;
