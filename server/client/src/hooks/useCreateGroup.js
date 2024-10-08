@@ -2,12 +2,14 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { CLOUD_NAME, UPLOAD_PRESET } from "../constants/constants";
 import { getAuthToken } from "../utils/utils";
+import { useToast } from "@chakra-ui/react";
 
 export const useCreateGroup = () => {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
   const navigate = useNavigate();
+  const toast = useToast();
 
   const uploadImageToCloudinary = async (image) => {
     const fileData = new FormData();
@@ -34,6 +36,13 @@ export const useCreateGroup = () => {
     if (!formData.name) {
       setError("Please provide a group name.");
       setLoading(false);
+      toast({
+        title: "Error",
+        description: "Please provide a group name.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
       return;
     }
 
@@ -66,14 +75,35 @@ export const useCreateGroup = () => {
       if (!response.ok) {
         setError(result.message || "Something went wrong");
         setLoading(false);
+        toast({
+          title: "Error",
+          description: result.message || "Something went wrong",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
         return;
       }
 
+      toast({
+        title: "Group created",
+        description: "Your new group has been created successfully.",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
       navigate(`/app/group/${result._id}`);
     } catch (error) {
       console.error("Error creating group:", error);
       setError("Internal server error");
       setLoading(false);
+      toast({
+        title: "Error",
+        description: "Internal server error",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 

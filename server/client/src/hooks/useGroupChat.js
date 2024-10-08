@@ -2,8 +2,11 @@
 import { useState, useEffect, useCallback } from "react";
 import { getAuthToken } from "../utils/utils";
 import { useCurrentUser } from "./useCurrentUser";
+import { useToast } from "@chakra-ui/react";
 
 export const useGroupChat = (groupId) => {
+  const toast = useToast();
+
   const [messages, setMessages] = useState([]);
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -14,11 +17,11 @@ export const useGroupChat = (groupId) => {
     try {
       const response = await fetch(`/api/groups/group/${groupId}`, {
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
+          Authorization: `Bearer ${getAuthToken()}`,
         },
       });
       if (!response.ok) {
-        throw new Error('Failed to fetch group details');
+        throw new Error("Failed to fetch group details");
       }
       const data = await response.json();
       setGroup(data);
@@ -31,11 +34,11 @@ export const useGroupChat = (groupId) => {
     try {
       const response = await fetch(`/api/messages/${groupId}`, {
         headers: {
-          'Authorization': `Bearer ${getAuthToken()}`,
+          Authorization: `Bearer ${getAuthToken()}`,
         },
       });
       if (!response.ok) {
-        throw new Error('Failed to fetch messages');
+        throw new Error("Failed to fetch messages");
       }
       const data = await response.json();
       setMessages(data);
@@ -54,39 +57,73 @@ export const useGroupChat = (groupId) => {
   const sendMessage = async (content) => {
     try {
       const response = await fetch(`/api/messages/${groupId}`, {
-        method: 'POST',
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
           Authorization: `Bearer ${getAuthToken()}`,
         },
         body: JSON.stringify({ content }),
       });
       if (!response.ok) {
-        throw new Error('Failed to send message');
+        throw new Error("Failed to send message");
       }
       const newMessage = await response.json();
       setMessages([...messages, newMessage]);
+      toast({
+        title: "Message sent",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
     } catch (err) {
-      setError('Failed to send message');
+      setError("Failed to send message");
+      toast({
+        title: "Error",
+        description: "Failed to send message",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
   const deleteMessage = async (messageId) => {
     try {
       const response = await fetch(`/api/messages/${messageId}`, {
-        method: 'DELETE',
+        method: "DELETE",
         headers: {
           Authorization: `Bearer ${getAuthToken()}`,
         },
       });
       if (!response.ok) {
-        throw new Error('Failed to delete message');
+        throw new Error("Failed to delete message");
       }
-      setMessages(messages.filter(message => message._id !== messageId));
+      setMessages(messages.filter((message) => message._id !== messageId));
+      toast({
+        title: "Message deleted",
+        status: "success",
+        duration: 2000,
+        isClosable: true,
+      });
     } catch (err) {
-      setError('Failed to delete message');
+      setError("Failed to delete message");
+      toast({
+        title: "Error",
+        description: "Failed to delete message",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     }
   };
 
-  return { group, messages, loading, error, sendMessage, currentUserId: currentUser?._id };
+  return {
+    group,
+    messages,
+    loading,
+    error,
+    sendMessage,
+    deleteMessage,
+    currentUserId: currentUser?._id,
+  };
 };
