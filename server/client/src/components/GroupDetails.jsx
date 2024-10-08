@@ -144,7 +144,7 @@ export default function GroupDetails({ groupId }) {
         <div className="flex flex-wrap gap-4 w-full">
           <Link to=".." className="w-full sm:w-1/2">
             <button className="btn bg-gray-200 text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md w-full">
-              Cancel
+              Go Back
             </button>
           </Link>
           {isUserMemberOrAdmin ? (

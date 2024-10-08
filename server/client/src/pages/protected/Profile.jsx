@@ -6,7 +6,7 @@ import { FiEdit, FiMail, FiPhone } from "react-icons/fi";
 
 export default function Profile() {
   const { profile, loading, error, fetchProfile, updateProfile } = useProfile();
-  const { logout } = useAuth();
+  const { removeToken } = useAuth(); 
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState({});
 
@@ -28,6 +28,10 @@ export default function Profile() {
     e.preventDefault();
     await updateProfile(editedProfile);
     setIsEditing(false);
+  };
+
+  const handleLogout = () => {
+    removeToken();
   };
 
   if (loading) return <Loading />;
@@ -56,7 +60,7 @@ export default function Profile() {
                     <FiEdit className="inline mr-2" /> Edit Profile
                   </button>
                   <button
-                    onClick={logout}
+                    onClick={handleLogout} // Change this line
                     className="px-4 py-2 bg-red-500 text-white rounded-full hover:bg-red-600 transition duration-300"
                   >
                     Logout
