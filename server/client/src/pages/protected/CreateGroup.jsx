@@ -23,7 +23,7 @@ export default function CreateGroup() {
   };
 
   return (
-    <div className="flex justify-center items-center min-h-screen bg-gray-100 p-4 mb-10">
+    <div className="flex justify-center items-start py-8">
       <div className="w-full max-w-md bg-white p-6 rounded-xl shadow-md">
         <h1 className="text-2xl font-semibold mb-4 text-center">
           Create Group

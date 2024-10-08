@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useGroupChat } from "../../hooks/useGroupChat";
 import Loading from "../../components/Loading";
@@ -9,12 +9,12 @@ export default function GroupChat() {
   const { groupId } = useParams();
   const { group, messages, loading, error, sendMessage, currentUserId } = useGroupChat(groupId);
   const [newMessage, setNewMessage] = useState("");
+  const chatContainerRef = useRef(null);
 
   useEffect(() => {
     // Scroll to bottom of chat
-    const chatContainer = document.getElementById("chat-container");
-    if (chatContainer) {
-      chatContainer.scrollTop = chatContainer.scrollHeight;
+    if (chatContainerRef.current) {
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -31,7 +31,7 @@ export default function GroupChat() {
   if (!group) return <div className="text-center">Group not found.</div>;
 
   return (
-    <div className="flex flex-col h-screen">
+    <div className="flex flex-col h-[calc(100vh-4rem)]"> {/* Adjust height as needed */}
       {/* Header */}
       <div className="bg-white shadow-md p-4 flex items-center">
         <Link to="/app/mygroups" className="mr-4">
@@ -41,21 +41,21 @@ export default function GroupChat() {
       </div>
 
       {/* Chat messages */}
-      <div id="chat-container" className="flex-1 overflow-y-auto p-4">
+      <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4">
         {messages.map((message) => (
           <div 
             key={message._id} 
             className={`mb-4 flex ${message.sender._id === currentUserId ? 'justify-end' : 'justify-start'}`}
           >
             <div 
-              className={`max-w-[70%] rounded-lg p-3 ${
+              className={`max-w-[75%] rounded-lg p-3 ${
                 message.sender._id === currentUserId 
-                  ? 'bg-blue-500 text-white' 
-                  : 'bg-gray-200 text-black'
+                  ? 'bg-blue-500 text-white ml-auto' 
+                  : 'bg-gray-200 text-black mr-auto'
               }`}
             >
-              <p className="font-bold">{message.sender.username}</p>
-              <p>{message.content}</p>
+              <p className="font-bold text-sm">{message.sender.username}</p>
+              <p className="break-words">{message.content}</p>
               <p className="text-xs mt-1 opacity-75">
                 {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
               </p>
@@ -65,16 +65,18 @@ export default function GroupChat() {
       </div>
 
       {/* Message input */}
-      <form onSubmit={handleSendMessage} className="p-4 bg-white">
-        <div className="flex">
+      <form onSubmit={handleSendMessage} className="p-4 bg-white border-t">
+        <div className="flex justify-center items-center max-w-4xl mx-auto">
           <input
             type="text"
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)}
-            className="flex-1 input input-bordered"
+            className="flex-1 input input-bordered min-w-0"
             placeholder="Type a message..."
           />
-          <button type="submit" className="btn btn-primary ml-2">Send</button>
+          <button type="submit" className="btn btn-primary ml-2 whitespace-nowrap">
+            Send
+          </button>
         </div>
       </form>
     </div>
