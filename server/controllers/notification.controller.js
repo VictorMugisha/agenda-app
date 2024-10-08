@@ -49,3 +49,22 @@ export const getUnreadNotificationsCount = async (req, res) => {
     res.status(500).json({ message: 'Internal server error' });
   }
 };
+
+export async function deleteNotification(req, res) {
+  try {
+    const { id } = req.params;
+    const result = await NotificationModel.deleteOne({
+      _id: id,
+      recipients: req.loggedInUser._id,
+    });
+
+    if (result.deletedCount === 0) {
+      return res.status(404).json({ message: "Notification not found or you're not authorized to delete it" });
+    }
+
+    res.status(200).json({ message: "Notification deleted successfully" });
+  } catch (error) {
+    console.log("Error in deleteNotification controller: ", error);
+    return res.status(500).json({ message: "Internal server error" });
+  }
+}

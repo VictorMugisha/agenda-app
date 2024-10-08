@@ -47,5 +47,5 @@ GroupCard.propTypes = {
       firstName: PropTypes.string.isRequired,
     }).isRequired,
   }).isRequired,
-  isMyGroup: PropTypes.bool.isRequired,
+  isMyGroup: PropTypes.bool,
 };

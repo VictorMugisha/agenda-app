@@ -126,42 +126,31 @@ export async function acceptRequest(req, res) {
       }
     );
 
+    // Delete the join request notification
+    await NotificationModel.deleteOne({
+      title: "New Join Request",
+      group: group._id,
+      recipients: userId,
+    });
+
     // Create notification for user
     const loggedInUserDetails = await UserModel.findById(userId).select(
       "-password"
     );
-
     const userNotification = {
-      title: "Request accepted",
-      content: `${loggedInUserDetails.firstName} ${loggedInUserDetails.lastName} has accepted your request to join the group ${group.name}`,
+      title: "Request Accepted",
+      content: `Your request to join the group ${group.name} has been accepted by ${loggedInUserDetails.firstName} ${loggedInUserDetails.lastName}`,
       group: group._id,
       author: userId,
       recipients: [request.user],
       isRead: false,
     };
 
-    await NotificationModel.save(userNotification);
-
-    // Create notification for group members
-    const user = await UserModel.findById(request.user);
-    if (!user) {
-      return res.status(404).json({ message: "User doesn't exist" });
-    }
-
-    const membersNotification = {
-      title: "Request accepted",
-      content: `${user.firstName} ${user.lastName} has has joined the group ${group.name}`,
-      group: group._id,
-      author: userId,
-      recipients: group.members,
-      isRead: false,
-    };
-
-    await NotificationModel.save(membersNotification);
+    await NotificationModel.create(userNotification);
 
     // Adding the group to the user
     await UserModel.findByIdAndUpdate(
-      user._id,
+      request.user,
       {
         $push: { groupsJoined: group._id },
       },

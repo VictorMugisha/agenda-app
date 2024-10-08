@@ -1,11 +1,13 @@
 import { useState, useCallback } from "react";
 import { useAuth } from "./useAuth";
+import { useToast } from "@chakra-ui/react"; // Add this import
 
 export const useNotifications = () => {
   const [notifications, setNotifications] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const { isAuthenticated } = useAuth();
+  const toast = useToast(); // Add this line
 
   const fetchNotifications = useCallback(async () => {
     if (!isAuthenticated) return;
@@ -73,5 +75,51 @@ export const useNotifications = () => {
     [isAuthenticated]
   );
 
-  return { notifications, loading, error, fetchNotifications, markAsRead };
+  const deleteNotification = useCallback(
+    async (notificationId) => {
+      if (!isAuthenticated) return;
+
+      try {
+        const response = await fetch(
+          `/api/notifications/${notificationId}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${localStorage.getItem("agenda_token")}`,
+            },
+          }
+        );
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(
+            errorData.message || "Failed to delete notification"
+          );
+        }
+
+        setNotifications((prevNotifications) =>
+          prevNotifications.filter((notification) => notification._id !== notificationId)
+        );
+
+        toast({
+          title: "Notification deleted",
+          status: "success",
+          duration: 3000,
+          isClosable: true,
+        });
+      } catch (err) {
+        setError(err.message || "Failed to delete notification");
+        toast({
+          title: "Error",
+          description: err.message || "Failed to delete notification",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
+    },
+    [isAuthenticated, toast]
+  );
+
+  return { notifications, loading, error, fetchNotifications, markAsRead, deleteNotification };
 };

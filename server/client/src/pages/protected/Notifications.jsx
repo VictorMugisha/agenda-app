@@ -1,51 +1,64 @@
 import { useEffect } from "react";
+import { format } from "date-fns";
 import { useNotifications } from "../../hooks/useNotifications";
 import Loading from "../../components/Loading";
-import { format } from "date-fns";
+import { Button, Box, Text, VStack, HStack, Heading } from "@chakra-ui/react";
 
 export default function Notifications() {
-  const { notifications, loading, error, fetchNotifications, markAsRead } = useNotifications();
+  const { notifications, loading, error, fetchNotifications, markAsRead, deleteNotification } = useNotifications();
 
   useEffect(() => {
     fetchNotifications();
   }, [fetchNotifications]);
 
   if (loading) return <Loading />;
-  if (error) return <div className="text-center text-red-500">{error}</div>;
+  if (error) return <Box textAlign="center" color="red.500">{error}</Box>;
 
   return (
-    <div className="mt-4">
-      <h1 className="text-2xl font-semibold pb-3">Notifications</h1>
+    <Box mt={4}>
+      <Heading as="h1" size="xl" mb={3}>Notifications</Heading>
       {notifications.length === 0 ? (
-        <p className="text-center text-gray-500">No notifications</p>
+        <Text textAlign="center" color="gray.500">No notifications</Text>
       ) : (
-        <div className="space-y-4">
+        <VStack spacing={4}>
           {notifications.map((notification) => (
-            <div
+            <Box
               key={notification._id}
-              className={`p-4 rounded-lg shadow ${
-                notification.isRead ? "bg-gray-100" : "bg-white"
-              }`}
+              p={4}
+              borderRadius="lg"
+              boxShadow="md"
+              bg={notification.isRead ? "gray.100" : "white"}
+              width="100%"
             >
-              <h2 className="text-lg font-semibold">{notification.title}</h2>
-              <p className="text-gray-600">{notification.content}</p>
-              <div className="flex justify-between items-center mt-2">
-                <span className="text-sm text-gray-500">
+              <Heading as="h2" size="md">{notification.title}</Heading>
+              <Text color="gray.600" mt={2}>{notification.content}</Text>
+              <HStack justifyContent="space-between" mt={2}>
+                <Text fontSize="sm" color="gray.500">
                   {format(new Date(notification.createdAt), "PPpp")}
-                </span>
-                {!notification.isRead && (
-                  <button
-                    onClick={() => markAsRead(notification._id)}
-                    className="text-sm text-blue-500 hover:text-blue-700"
+                </Text>
+                <HStack>
+                  {!notification.isRead && (
+                    <Button
+                      size="sm"
+                      colorScheme="blue"
+                      onClick={() => markAsRead(notification._id)}
+                    >
+                      Mark as read
+                    </Button>
+                  )}
+                  <Button
+                    size="sm"
+                    colorScheme="red"
+                    onClick={() => deleteNotification(notification._id)}
                   >
-                    Mark as read
-                  </button>
-                )}
-              </div>
-            </div>
+                    Delete
+                  </Button>
+                </HStack>
+              </HStack>
+            </Box>
           ))}
-        </div>
+        </VStack>
       )}
-    </div>
+    </Box>
   );
 }
