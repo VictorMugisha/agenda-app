@@ -287,8 +287,7 @@ export const getGroupRequests = async (req, res) => {
 
 export const handleJoinRequest = async (req, res) => {
   try {
-    const { groupId, requestId } = req.params;
-    const { action } = req.body; // 'accept' or 'decline'
+    const { groupId, requestId, action } = req.params;
     const userId = req.loggedInUser._id;
 
     const group = await GroupModel.findById(groupId);
@@ -304,8 +303,8 @@ export const handleJoinRequest = async (req, res) => {
     if (action === 'accept') {
       await GroupModel.findByIdAndUpdate(groupId, { $addToSet: { members: request.user } });
       request.status = 'accepted';
-    } else if (action === 'decline') {
-      request.status = 'declined';
+    } else if (action === 'reject') {
+      request.status = 'rejected';
     } else {
       return res.status(400).json({ message: 'Invalid action' });
     }

@@ -121,50 +121,52 @@ export default function GroupDetails({ groupId }) {
         </div>
       </div>
 
-      <div className="flex justify-center space-x-4 mb-6">
-        <Link to="..">
-          <button className="btn bg-gray-200 text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md">
-            Cancel
-          </button>
-        </Link>
-        {isUserMemberOrAdmin ? (
-          <Link to={`/app/group/${groupId}/chat`}>
-            <button className="btn bg-gray-200 text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md">
-              Open
+      <div className="flex flex-col gap-4 mb-6 w-full">
+        <div className="flex flex-wrap gap-4 w-full">
+          <Link to=".." className="w-full sm:w-1/2">
+            <button className="btn bg-gray-200 text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md w-full">
+              Cancel
             </button>
           </Link>
-        ) : hasPendingRequest ? (
-          <button
-            className="btn bg-yellow-200 text-yellow-800 py-2 px-6 rounded-lg shadow-md cursor-not-allowed"
-            disabled
-          >
-            Pending
-          </button>
-        ) : (
-          <button
-            className="btn app-primary-btn text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md"
-            onClick={() => sendRequest(groupId)}
-            disabled={requestLoading}
-            style={{ cursor: requestLoading ? "not-allowed" : "pointer" }}
-          >
-            Request
-          </button>
-        )}
-        {isUserAdmin && (
-          <>
+          {isUserMemberOrAdmin ? (
+            <Link to={`/app/group/${groupId}/chat`} className="w-full sm:w-1/2">
+              <button className="btn bg-gray-200 text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md w-full">
+                Open
+              </button>
+            </Link>
+          ) : hasPendingRequest ? (
             <button
-              className="btn bg-blue-500 text-white hover:bg-blue-600 py-2 px-6 rounded-lg shadow-md"
+              className="btn bg-yellow-200 text-yellow-800 py-2 px-6 rounded-lg shadow-md cursor-not-allowed w-full sm:w-1/2"
+              disabled
+            >
+              Pending
+            </button>
+          ) : (
+            <button
+              className="btn app-primary-btn text-gray-700 hover:bg-gray-300 py-2 px-6 rounded-lg shadow-md w-full sm:w-1/2"
+              onClick={() => sendRequest(groupId)}
+              disabled={requestLoading}
+              style={{ cursor: requestLoading ? "not-allowed" : "pointer" }}
+            >
+              Request
+            </button>
+          )}
+        </div>
+        {isUserAdmin && (
+          <div className="flex flex-wrap gap-4 w-full">
+            <button
+              className="btn bg-blue-500 text-white hover:bg-blue-600 py-2 px-6 rounded-lg shadow-md w-full sm:w-1/2"
               onClick={() => setShowEditForm(true)}
             >
               Edit Group
             </button>
             <button
-              className="btn bg-red-500 text-white hover:bg-red-600 py-2 px-6 rounded-lg shadow-md"
+              className="btn bg-red-500 text-white hover:bg-red-600 py-2 px-6 rounded-lg shadow-md w-full sm:w-1/2"
               onClick={onOpen}
             >
               Delete Group
             </button>
-          </>
+          </div>
         )}
       </div>
 
