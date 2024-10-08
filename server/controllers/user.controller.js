@@ -48,6 +48,7 @@ export async function updateUser(req, res) {
       username,
       email,
       phoneNumber,
+      bio,
       profilePicture,
       currentPassword,
       newPassword,
@@ -61,6 +62,7 @@ export async function updateUser(req, res) {
     if (username) updates.username = username;
     if (email) updates.email = email;
     if (phoneNumber) updates.phoneNumber = phoneNumber;
+    if (bio) updates.bio = bio;
     if (profilePicture) updates.profilePicture = profilePicture;
 
     if (currentPassword || newPassword || confirmNewPassword) {
@@ -143,10 +145,10 @@ export async function getProfile(req, res) {
 
 export async function updateProfile(req, res) {
   try {
-    const { firstName, lastName, email } = req.body;
+    const { firstName, lastName, email, phoneNumber, bio } = req.body;
     const updatedUser = await UserModel.findByIdAndUpdate(
       req.loggedInUser._id,
-      { firstName, lastName, email },
+      { firstName, lastName, email, phoneNumber, bio },
       { new: true, runValidators: true }
     ).select("-password");
 

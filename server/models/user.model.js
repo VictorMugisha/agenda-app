@@ -23,6 +23,11 @@ const userSchema = new mongoose.Schema(
     phoneNumber: {
       type: String,
       unique: true,
+      sparse: true, // This allows the field to be optional while maintaining uniqueness
+    },
+    bio: {
+      type: String,
+      maxlength: 500,
     },
     password: {
       type: String,

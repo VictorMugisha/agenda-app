@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useProfile } from "../../hooks/useProfile";
 import { useAuth } from "../../hooks/useAuth";
 import Loading from "../../components/Loading";
-import { FiEdit, FiLink, FiMail, FiPhone } from "react-icons/fi";
+import { FiEdit, FiMail, FiPhone } from "react-icons/fi";
 
 export default function Profile() {
   const { profile, loading, error, fetchProfile, updateProfile } = useProfile();
@@ -66,15 +66,9 @@ export default function Profile() {
                   <p className="flex items-center">
                     <FiMail className="mr-2" /> {profile.email}
                   </p>
-                  <p className="flex items-center">
-                    <FiPhone className="mr-2" /> {profile.phoneNumber}
-                  </p>
-                  {profile.website && (
+                  {profile.phoneNumber && (
                     <p className="flex items-center">
-                      <FiLink className="mr-2" />
-                      <a href={profile.website} target="_blank" rel="noopener noreferrer" className="text-blue-500 hover:underline">
-                        {profile.website}
-                      </a>
+                      <FiPhone className="mr-2" /> {profile.phoneNumber}
                     </p>
                   )}
                 </div>
@@ -122,10 +116,10 @@ export default function Profile() {
               ></textarea>
               <input
                 type="text"
-                name="website"
-                value={editedProfile.website || ""}
+                name="phoneNumber"
+                value={editedProfile.phoneNumber || ""}
                 onChange={handleInputChange}
-                placeholder="Website"
+                placeholder="Phone Number"
                 className="w-full p-2 border rounded"
               />
               <div className="flex justify-end space-x-2">

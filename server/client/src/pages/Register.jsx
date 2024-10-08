@@ -8,7 +8,6 @@ export default function Register() {
     lastName: "",
     email: "",
     username: "",
-    phoneNumber: "",
     password: "",
     confirmPassword: "",
     profilePicture: null,
@@ -151,22 +150,6 @@ export default function Register() {
               onChange={handleChange}
               className="input input-bordered w-full"
               placeholder="Choose a username"
-              required
-            />
-          </div>
-
-          {/* Phone Number */}
-          <div className="mb-4">
-            <label className="block text-sm font-medium mb-1">
-              Phone Number
-            </label>
-            <input
-              type="text"
-              name="phoneNumber"
-              value={formData.phoneNumber}
-              onChange={handleChange}
-              className="input input-bordered w-full"
-              placeholder="Enter your phone number"
               required
             />
           </div>
