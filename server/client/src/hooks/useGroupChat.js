@@ -3,10 +3,10 @@ import { useState, useEffect, useCallback } from "react";
 import { getAuthToken } from "../utils/utils";
 import { useCurrentUser } from "./useCurrentUser";
 import { useToast } from "@chakra-ui/react";
+import socket from "../socket";
 
 export const useGroupChat = (groupId) => {
   const toast = useToast();
-
   const [messages, setMessages] = useState([]);
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -52,7 +52,21 @@ export const useGroupChat = (groupId) => {
   useEffect(() => {
     fetchGroupDetails();
     fetchMessages();
-  }, [fetchGroupDetails, fetchMessages]);
+
+    // Join the group's socket room
+    socket.emit("join_group", groupId);
+
+    // Listen for new messages
+    socket.on("receive_message", (newMessage) => {
+      setMessages((prevMessages) => [...prevMessages, newMessage]);
+    });
+
+    return () => {
+      // Leave the group's socket room when component unmounts
+      socket.emit("leave_group", groupId);
+      socket.off("receive_message");
+    };
+  }, [groupId, fetchGroupDetails, fetchMessages]);
 
   const sendMessage = async (content) => {
     try {
@@ -68,7 +82,7 @@ export const useGroupChat = (groupId) => {
         throw new Error("Failed to send message");
       }
       const newMessage = await response.json();
-      setMessages([...messages, newMessage]);
+      // No need to update messages here, as it will be handled by the socket event
       toast({
         title: "Message sent",
         status: "success",
