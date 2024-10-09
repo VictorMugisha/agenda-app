@@ -15,14 +15,11 @@ export async function registerUser(req, res) {
       profilePicture,
     } = req.body;
 
-    console.log("Submitted User Data: ", req.body);
-
     if (
       !firstName ||
       !lastName ||
       !email ||
       !username ||
-      !phoneNumber ||
       !password ||
       !confirmPassword
     ) {
@@ -41,12 +38,6 @@ export async function registerUser(req, res) {
       return res.status(400).json({ message: "User already exists" });
     }
 
-    if (phoneNumber.length !== 10) {
-      return res
-        .status(400)
-        .json({ message: "Phone number must be 10 digits" });
-    }
-
     const salt = await bcryptjs.genSalt(10);
     const hashedPassword = await bcryptjs.hash(password, salt);
 
@@ -55,7 +46,6 @@ export async function registerUser(req, res) {
       lastName,
       email,
       username,
-      phoneNumber,
       password: hashedPassword,
       profilePicture,
     });
