@@ -1,12 +1,11 @@
 import { useEffect, useState } from "react";
 import { useAuth } from "../../hooks/useAuth";
-import Loading from "../../components/Loading";
 import { FiEdit, FiMail, FiPhone } from "react-icons/fi";
 import useUserStore from "../../store/userStore";
+import SkeletonProfile from "../../components/SkeletonProfile"; // We'll create this component
 
 export default function Profile() {
-  const { profile, loading, error, fetchProfile, updateProfile } =
-    useUserStore();
+  const { profile, loading, error, fetchProfile, updateProfile } = useUserStore();
   const { removeToken } = useAuth(); 
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState({});
@@ -35,12 +34,13 @@ export default function Profile() {
     removeToken();
   };
 
-  if (loading) return <Loading />;
   if (error) return <div className="text-center text-red-500">{error}</div>;
 
   return (
     <div className="bg-gray-100 pt-8">
-      {profile && (
+      {loading ? (
+        <SkeletonProfile />
+      ) : profile && (
         <div className="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="bg-white rounded-lg shadow-md overflow-hidden">
             <div className="p-6 sm:p-8 flex flex-col sm:flex-row items-center sm:items-start">
