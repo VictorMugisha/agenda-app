@@ -62,7 +62,7 @@ export const useEditGroup = (groupId) => {
       const result = await response.json();
 
       if (!response.ok) {
-        throw new Error(result.message || "Failed to update group");
+        throw new Error(result.message ?? "Failed to update group");
       }
 
       return result;

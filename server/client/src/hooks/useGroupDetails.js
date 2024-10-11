@@ -27,5 +27,5 @@ export const useGroupDetails = (groupId) => {
     }
   }, [groupId]);
 
-  return { group, loading, error, fetchGroupDetails };
+  return { group, setGroup, loading, error, fetchGroupDetails };
 };

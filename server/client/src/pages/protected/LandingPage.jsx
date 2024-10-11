@@ -82,19 +82,22 @@ export default function LandingPage() {
 
           <div className="bg-white p-4 rounded-lg shadow-md">
             <h2 className="text-lg font-semibold mb-3">Recent Groups</h2>
-            <ul className="space-y-2">
-              {displayedGroups.map((group) => (
-                <li
-                  key={group._id}
-                  className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-md transition-colors"
-                >
-                  <Link to={`/app/group/${group._id}`} className="flex-grow text-sm">
-                    {group.name}
-                  </Link>
-                  {/* Note: We don't have unreadMessages in the current group object */}
-                </li>
-              ))}
-            </ul>
+            {displayedGroups.length > 0 ? (
+              <ul className="space-y-2">
+                {displayedGroups.map((group) => (
+                  <li
+                    key={group._id}
+                    className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-md transition-colors"
+                  >
+                    <Link to={`/app/group/${group._id}`} className="flex-grow text-sm">
+                      {group.name}
+                    </Link>
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-sm text-gray-500">You {"haven't"} joined any groups yet.</p>
+            )}
           </div>
 
           <div className="bg-white p-4 rounded-lg shadow-md">
