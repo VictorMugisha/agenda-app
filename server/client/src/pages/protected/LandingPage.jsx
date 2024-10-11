@@ -6,23 +6,37 @@ import {
   FiSearch,
   FiUser,
 } from "react-icons/fi";
-
-const mockUserData = {
-  name: "John Doe",
-  recentGroups: [
-    { id: 1, name: "Project Alpha", unreadMessages: 3 },
-    { id: 2, name: "Team Brainstorm", unreadMessages: 0 },
-    { id: 3, name: "Book Club", unreadMessages: 1 },
-  ],
-  notifications: 2,
-};
+import { useProfile } from "../../hooks/useProfile";
+import { useMyGroups } from "../../hooks/useMyGroups";
+import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
+import Loading from "../../components/Loading";
+import { useEffect } from "react";
 
 export default function LandingPage() {
+  const { profile, loading: profileLoading, error: profileError } = useProfile();
+  const { groups: recentGroups, loading: groupsLoading, error: groupsError, fetchMyGroups } = useMyGroups();
+  const unreadCount = useUnreadNotifications();
+
+  useEffect(() => {
+    fetchMyGroups();
+  }, [fetchMyGroups]);
+
+  if (profileLoading || groupsLoading) {
+    return <Loading />;
+  }
+
+  if (profileError || groupsError) {
+    return <div>Error loading data</div>;
+  }
+
+  // Assuming we want to show only the 3 most recent groups
+  const displayedGroups = recentGroups.slice(0, 3);
+
   return (
     <div className="flex flex-col min-h-screen bg-gray-100">
       <main className="flex-grow container mx-auto px-4 py-6">
         <h1 className="text-2xl sm:text-3xl font-bold mb-6">
-          Welcome, {mockUserData.name}!
+          Welcome, {profile?.firstName || 'User'}!
         </h1>
 
         <div className="space-y-6">
@@ -56,9 +70,9 @@ export default function LandingPage() {
               >
                 <FiBell className="text-xl mb-1" />
                 <span className="text-sm text-center">Notifications</span>
-                {mockUserData.notifications > 0 && (
+                {unreadCount > 0 && (
                   <span className="absolute top-1 right-1 bg-red-500 text-white text-xs font-bold w-5 h-5 flex items-center justify-center rounded-full">
-                    {mockUserData.notifications}
+                    {unreadCount}
                   </span>
                 )}
               </Link>
@@ -68,19 +82,15 @@ export default function LandingPage() {
           <div className="bg-white p-4 rounded-lg shadow-md">
             <h2 className="text-lg font-semibold mb-3">Recent Groups</h2>
             <ul className="space-y-2">
-              {mockUserData.recentGroups.map((group) => (
+              {displayedGroups.map((group) => (
                 <li
-                  key={group.id}
+                  key={group._id}
                   className="flex items-center justify-between p-2 hover:bg-gray-100 rounded-md transition-colors"
                 >
-                  <Link to={`/app/group/${group.id}`} className="flex-grow text-sm">
+                  <Link to={`/app/group/${group._id}`} className="flex-grow text-sm">
                     {group.name}
                   </Link>
-                  {group.unreadMessages > 0 && (
-                    <span className="bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-                      {group.unreadMessages}
-                    </span>
-                  )}
+                  {/* Note: We don't have unreadMessages in the current group object */}
                 </li>
               ))}
             </ul>
