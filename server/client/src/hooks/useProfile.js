@@ -1,4 +1,3 @@
-/* eslint-disable no-unused-vars */
 import { useState, useCallback } from "react";
 import { useAuth } from "./useAuth";
 
@@ -6,7 +5,7 @@ export const useProfile = () => {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const { isAuthenticated, setToken } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const fetchProfile = useCallback(async () => {
     if (!isAuthenticated) return;

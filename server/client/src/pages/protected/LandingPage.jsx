@@ -13,13 +13,14 @@ import Loading from "../../components/Loading";
 import { useEffect } from "react";
 
 export default function LandingPage() {
-  const { profile, loading: profileLoading, error: profileError } = useProfile();
+  const { profile, loading: profileLoading, error: profileError,fetchProfile } = useProfile();
   const { groups: recentGroups, loading: groupsLoading, error: groupsError, fetchMyGroups } = useMyGroups();
   const { unreadCount, error: notificationError } = useUnreadNotifications();
 
   useEffect(() => {
     fetchMyGroups();
-  }, [fetchMyGroups]);
+    fetchProfile();
+  }, [fetchMyGroups, fetchProfile]);
 
   if (groupsLoading || profileLoading) {
     return <Loading />;
@@ -36,7 +37,7 @@ export default function LandingPage() {
     <div className="flex flex-col min-h-screen bg-gray-100">
       <main className="flex-grow container mx-auto px-4 py-6">
         <h1 className="text-2xl sm:text-3xl font-bold mb-6">
-          Welcome, {profile?.firstName || 'User'}!
+          Welcome, {profile?.firstName ?? 'User'}!
         </h1>
 
         <div className="space-y-6">
