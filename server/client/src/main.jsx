@@ -21,6 +21,7 @@ import CreateGroup from "./pages/protected/CreateGroup.jsx";
 import customTheme from "./chakra/theme.js";
 import GroupChat from "./pages/protected/GroupChat.jsx";
 import GroupMembers from "./pages/protected/GroupMembers.jsx";
+import LandingPage from "./pages/protected/LandingPage.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -34,7 +35,8 @@ createRoot(document.getElementById("root")).render(
               <Route path="login" element={<Login />} />
             </Route>
             <Route path="/app" element={<ProtectedRoute />}>
-              <Route path="" element={<HomePage />} />
+              <Route index element={<LandingPage />} />
+              <Route path="home" element={<HomePage />} />
               <Route path="notifications" element={<Notifications />} />
               <Route path="create" element={<CreateGroup />} />
               <Route path="mygroups" element={<MyGroups />} />
