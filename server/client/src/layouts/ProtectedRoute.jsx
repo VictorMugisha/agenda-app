@@ -12,7 +12,7 @@ export default function ProtectedRoute() {
   return (
     <div className="flex flex-col min-h-screen">
       <main className="flex-1 overflow-y-auto pb-16">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div className="max-w-7xl mx-auto sm:px-6 lg:px-8 w-full">
           <Outlet />
         </div>
       </main>
