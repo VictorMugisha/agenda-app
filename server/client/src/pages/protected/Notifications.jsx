@@ -15,10 +15,14 @@ export default function Notifications() {
   if (error) return <Box textAlign="center" color="red.500">{error}</Box>;
 
   return (
-    <Box mt={4}>
-      <Heading as="h1" size="xl" mb={3}>Notifications</Heading>
+    <Box mt={4} className="px-2">
+      <Heading as="h1" size="xl" mb={3}>
+        Notifications
+      </Heading>
       {notifications.length === 0 ? (
-        <Text textAlign="center" color="gray.500">No notifications</Text>
+        <Text textAlign="center" color="gray.500">
+          No notifications
+        </Text>
       ) : (
         <VStack spacing={4}>
           {notifications.map((notification) => (
@@ -30,8 +34,12 @@ export default function Notifications() {
               bg={notification.isRead ? "gray.100" : "white"}
               width="100%"
             >
-              <Heading as="h2" size="md">{notification.title}</Heading>
-              <Text color="gray.600" mt={2}>{notification.content}</Text>
+              <Heading as="h2" size="md">
+                {notification.title}
+              </Heading>
+              <Text color="gray.600" mt={2}>
+                {notification.content}
+              </Text>
               <HStack justifyContent="space-between" mt={2}>
                 <Text fontSize="sm" color="gray.500">
                   {format(new Date(notification.createdAt), "PPpp")}

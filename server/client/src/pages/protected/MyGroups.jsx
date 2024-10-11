@@ -52,7 +52,7 @@ export default function MyGroups() {
     );
 
   return (
-    <Box>
+    <Box className="px-2 py-4">
       <Heading as="h1" size="xl" mb={4}>
         My Groups
       </Heading>

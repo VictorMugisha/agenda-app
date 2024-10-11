@@ -6,7 +6,7 @@ export default function HomePage() {
   const [groupSearch, setGroupSearch] = useState("");
   
   return (
-    <div className="flex flex-col h-full">
+    <div className="flex flex-col h-full px-2 py-4">
       <h1 className="text-2xl font-semibold pb-3">Available Groups</h1>
       <label className="input input-bordered flex items-center gap-2 bg-app-primary rounded-3xl mb-4">
         <IoSearchOutline className="text-xl" />

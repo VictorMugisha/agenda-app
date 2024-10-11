@@ -34,8 +34,8 @@ export default function LandingPage() {
   const displayedGroups = recentGroups.slice(0, 3);
 
   return (
-    <div className="flex flex-col min-h-screen bg-gray-100">
-      <main className="flex-grow container mx-auto px-4 py-6">
+    <div className="flex flex-col min-h-screen bg-gray-100 px-2">
+      <main className="flex-grow container mx-auto py-6">
         <h1 className="text-2xl sm:text-3xl font-bold mb-6">
           Welcome, {profile?.firstName ?? 'User'}!
         </h1>
