@@ -3,7 +3,7 @@ import { useParams, Link } from "react-router-dom";
 import { useGroupChat } from "../../hooks/useGroupChat";
 import Loading from "../../components/Loading";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowLeftIcon } from "@heroicons/react/24/solid";
+import { ArrowLeftIcon, InformationCircleIcon } from "@heroicons/react/24/solid";
 
 export default function GroupChat() {
   const { groupId } = useParams();
@@ -31,13 +31,18 @@ export default function GroupChat() {
   if (!group) return <div className="text-center">Group not found.</div>;
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)]"> {/* Adjust height as needed */}
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
       {/* Header */}
-      <div className="bg-white shadow-md p-4 flex items-center">
-        <Link to="/app/mygroups" className="mr-4">
-          <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
-        </Link>
-        <h1 className="text-xl font-semibold">{group.name}</h1>
+      <div className="bg-white shadow-md p-4 flex items-center justify-between">
+        <div className="flex items-center">
+          <Link to="/app/mygroups" className="mr-4">
+            <ArrowLeftIcon className="h-6 w-6 text-gray-600" />
+          </Link>
+          <Link to={`/app/group/${groupId}`} className="flex items-center">
+            <h1 className="text-xl font-semibold">{group.name}</h1>
+            <InformationCircleIcon className="h-5 w-5 ml-2 text-gray-600" />
+          </Link>
+        </div>
       </div>
 
       {/* Chat messages */}
