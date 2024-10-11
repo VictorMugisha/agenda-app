@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 export async function getMessages(req, res) {
   try {
     const { groupId } = req.params;
+    const userId = req.loggedInUser._id;
     
     if (!groupId || !mongoose.Types.ObjectId.isValid(groupId)) {
       return res.status(400).json({ message: "Invalid group ID" });
@@ -12,7 +13,14 @@ export async function getMessages(req, res) {
 
     const messages = await MessageModel.find({ group: groupId })
       .sort({ createdAt: 1 })
-      .populate("sender", "firstName lastName username");
+      .populate("sender", "firstName lastName username")
+      .populate("readBy", "firstName lastName");
+
+    // Mark messages as read
+    await MessageModel.updateMany(
+      { group: groupId, readBy: { $ne: userId } },
+      { $addToSet: { readBy: userId } }
+    );
 
     res.status(200).json(messages);
   } catch (error) {
@@ -46,6 +54,9 @@ export async function sendMessage(req, res) {
 
     await newMessage.save();
     await newMessage.populate("sender", "firstName lastName username");
+
+    // Emit the new message to all users in the group
+    req.app.get('io').to(groupId).emit('receive_message', newMessage);
 
     res.status(201).json(newMessage);
   } catch (error) {

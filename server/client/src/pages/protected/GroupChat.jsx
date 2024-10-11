@@ -1,18 +1,31 @@
+/* eslint-disable no-unused-vars */
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useGroupChat } from "../../hooks/useGroupChat";
 import Loading from "../../components/Loading";
 import { formatDistanceToNow } from "date-fns";
 import { ArrowLeftIcon, InformationCircleIcon } from "@heroicons/react/24/solid";
+import { 
+  Modal, 
+  ModalOverlay, 
+  ModalContent, 
+  ModalHeader, 
+  ModalFooter, 
+  ModalBody, 
+  ModalCloseButton,
+  Button,
+  useDisclosure
+} from "@chakra-ui/react";
 
 export default function GroupChat() {
   const { groupId } = useParams();
-  const { group, messages, loading, error, sendMessage, currentUserId } = useGroupChat(groupId);
+  const { group, messages, loading, error, sendMessage, currentUserId, markAsRead } = useGroupChat(groupId);
   const [newMessage, setNewMessage] = useState("");
   const chatContainerRef = useRef(null);
+  const [selectedMessage, setSelectedMessage] = useState(null);
+  const { isOpen, onOpen, onClose } = useDisclosure();
 
   useEffect(() => {
-    // Scroll to bottom of chat
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
@@ -21,9 +34,14 @@ export default function GroupChat() {
   const handleSendMessage = (e) => {
     e.preventDefault();
     if (newMessage.trim()) {
-      sendMessage(newMessage);
+      sendMessage(newMessage.trim());
       setNewMessage("");
     }
+  };
+
+  const handleReadReceipt = (message) => {
+    setSelectedMessage(message);
+    onOpen();
   };
 
   if (loading) return <Loading />;
@@ -49,7 +67,7 @@ export default function GroupChat() {
       <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4">
         {messages.map((message) => (
           <div 
-            key={message._id} 
+            key={message._id}
             className={`mb-4 flex ${message.sender._id === currentUserId ? 'justify-end' : 'justify-start'}`}
           >
             <div 
@@ -61,9 +79,17 @@ export default function GroupChat() {
             >
               <p className="font-bold text-sm">{message.sender.username}</p>
               <p className="break-words">{message.content}</p>
-              <p className="text-xs mt-1 opacity-75">
-                {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
-              </p>
+              <div className="flex justify-between items-center mt-1">
+                <p className="text-xs opacity-75">
+                  {formatDistanceToNow(new Date(message.createdAt), { addSuffix: true })}
+                </p>
+                <button 
+                  onClick={() => handleReadReceipt(message)} 
+                  className="text-xs opacity-75 hover:opacity-100"
+                >
+                  {message.readBy.length} read
+                </button>
+              </div>
             </div>
           </div>
         ))}
@@ -84,6 +110,32 @@ export default function GroupChat() {
           </button>
         </div>
       </form>
+
+      {/* Read Receipt Modal */}
+      <Modal isOpen={isOpen} onClose={onClose}>
+        <ModalOverlay />
+        <ModalContent>
+          <ModalHeader>Read by</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            {selectedMessage && (
+              <ul>
+                {selectedMessage.readBy.map((userId) => {
+                  const user = group.members.find(member => member._id === userId);
+                  return user ? (
+                    <li key={userId}>{`${user.firstName} ${user.lastName}`}</li>
+                  ) : null;
+                })}
+              </ul>
+            )}
+          </ModalBody>
+          <ModalFooter>
+            <Button colorScheme="blue" mr={3} onClick={onClose}>
+              Close
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </div>
   );
 }
