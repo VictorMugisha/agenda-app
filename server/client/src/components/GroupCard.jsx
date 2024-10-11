@@ -5,7 +5,6 @@ import { useGroupMembership } from "../hooks/useGroupMembership";
 export default function GroupCard({ group }) {
   const navigate = useNavigate();
 
-  // Safely access properties
   const groupId = group?._id || group?.id;
   const groupName = group?.name || 'Unnamed Group';
   const groupDescription = group?.description || 'No description available';
@@ -28,48 +27,50 @@ export default function GroupCard({ group }) {
     return null;
   }
 
-  if (loading) {
-    return <div>Loading...</div>; // Or a loading spinner
-  }
+  if (loading) return <div className="bg-gray-100 p-4 rounded-lg">Loading...</div>;
 
   if (error) {
     console.error("Error checking group membership:", error);
-    // You might want to handle this error more gracefully
+    return <div className="bg-red-100 p-4 rounded-lg">Error loading group</div>;
   }
 
   return (
     <div 
       onClick={handleClick}
       onKeyDown={(e) => e.key === 'Enter' && handleClick()}
-      className="bg-white rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow duration-300 cursor-pointer"
+      className="bg-gray-100 rounded-lg shadow-sm p-4 hover:shadow-md transition-shadow duration-300 cursor-pointer relative"
       tabIndex={0}
       role="button"
       aria-label={`Group ${groupName}. ${isAdmin ? 'You are the admin.' : isMember ? 'You are a member.' : hasPendingRequest ? 'Your join request is pending.' : 'Click to view details.'}`}
     >
-      <h2 className="text-lg font-semibold mb-1 truncate" title={groupName}>
-        {groupName}
-      </h2>
+      <div className="flex justify-between items-start mb-2">
+        <h2 className="text-lg font-semibold truncate flex-grow" title={groupName}>
+          {groupName}
+        </h2>
+        <div className="flex flex-col gap-1">
+          {isAdmin && (
+            <span className="bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+              Admin
+            </span>
+          )}
+          {isMember && !isAdmin && (
+            <span className="bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+              Member
+            </span>
+          )}
+          {hasPendingRequest && (
+            <span className="bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
+              Pending
+            </span>
+          )}
+        </div>
+      </div>
       <p className="text-sm text-gray-600 mb-2 line-clamp-2" title={groupDescription}>
         {groupDescription}
       </p>
       <p className="text-xs text-gray-500">
         Admin: {adminName}
       </p>
-      {isAdmin && (
-        <span className="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-          Admin
-        </span>
-      )}
-      {isMember && !isAdmin && (
-        <span className="absolute top-2 right-2 bg-green-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-          Member
-        </span>
-      )}
-      {hasPendingRequest && (
-        <span className="absolute top-2 right-2 bg-yellow-500 text-white text-xs font-bold px-2 py-1 rounded-full">
-          Pending
-        </span>
-      )}
     </div>
   );
 }

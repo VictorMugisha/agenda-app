@@ -28,7 +28,7 @@ export default function AvailableGroups({ searchQuery }) {
 
   return (
     <div className="h-full overflow-y-auto scrollbar-hide">
-      <div className="grid md:grid-cols-3 gap-4 pb-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-4">
         {filteredGroups.map((group) => (
           <GroupCard 
             key={group._id} 

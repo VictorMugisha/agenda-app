@@ -66,7 +66,7 @@ export default function MyGroups() {
           You {"haven't"} joined any groups yet.
         </Text>
       ) : (
-        <SimpleGrid columns={{ base: 1, md: 2, lg: 3 }} spacing={4}>
+        <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4}>
           {groups.map((group) => (
             <GroupCard
               key={group._id}
