@@ -2,6 +2,7 @@ import mongoose from "mongoose";
 import GroupModel from "../models/group.model.js";
 import UserModel from "../models/user.model.js";
 import RequestModel from "../models/request.model.js";
+import AnnouncementModel from "../models/announcement.model.js";
 
 export async function createGroup(req, res) {
   try {
@@ -80,7 +81,8 @@ export async function getMyGroups(req, res) {
     const userId = req.loggedInUser._id;
     const myGroups = await GroupModel.find({ members: userId })
       .populate("admin", "firstName lastName username")
-      .select("-password");
+      .populate("members", "firstName lastName username")
+      .select("-announcements"); // Exclude announcements if not needed
 
     res.status(200).json(myGroups);
   } catch (error) {
@@ -93,14 +95,9 @@ export async function getSingleGroup(req, res) {
   try {
     const { id } = req.params;
     const group = await GroupModel.findById(id)
-      .populate({
-        path: "admin",
-        select: "-password",
-      })
-      .populate({
-        path: "members",
-        select: "-password",
-      });
+      .populate("admin", "firstName lastName username")
+      .populate("members", "firstName lastName username")
+      .populate("announcements");
 
     if (!group) {
       return res.status(404).json({ message: "Group not found" });

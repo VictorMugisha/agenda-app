@@ -57,7 +57,12 @@ export default function MyGroups() {
         My Groups
       </Heading>
       {groups.length === 0 ? (
-        <Text fontStyle="italic" fontSize="lg" textAlign="center" color="gray.600">
+        <Text
+          fontStyle="italic"
+          fontSize="lg"
+          textAlign="center"
+          color="gray.600"
+        >
           You {"haven't"} joined any groups yet.
         </Text>
       ) : (

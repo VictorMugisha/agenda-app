@@ -15,17 +15,17 @@ import { useEffect } from "react";
 export default function LandingPage() {
   const { profile, loading: profileLoading, error: profileError } = useProfile();
   const { groups: recentGroups, loading: groupsLoading, error: groupsError, fetchMyGroups } = useMyGroups();
-  const unreadCount = useUnreadNotifications();
+  const { unreadCount, error: notificationError } = useUnreadNotifications();
 
   useEffect(() => {
     fetchMyGroups();
   }, [fetchMyGroups]);
 
-  if (profileLoading || groupsLoading) {
+  if (groupsLoading || profileLoading) {
     return <Loading />;
   }
 
-  if (profileError || groupsError) {
+  if (profileError || groupsError || notificationError) {
     return <div>Error loading data</div>;
   }
 

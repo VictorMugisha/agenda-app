@@ -24,10 +24,17 @@ export const useMyGroups = () => {
       setGroups(data);
     } catch (err) {
       setError(err.message || "Failed to fetch your groups");
+      toast({
+        title: "Error",
+        description: "Failed to fetch your groups. Please try again later.",
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
     } finally {
       setLoading(false);
     }
-  }, []);
+  }, [toast]);
 
   const joinGroup = useCallback(async (groupId) => {
     setLoading(true);

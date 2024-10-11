@@ -3,6 +3,7 @@ import { getAuthToken } from "../utils/utils";
 
 export const useUnreadNotifications = () => {
   const [unreadCount, setUnreadCount] = useState(0);
+  const [error, setError] = useState(null);
 
   useEffect(() => {
     const fetchUnreadCount = async () => {
@@ -19,6 +20,8 @@ export const useUnreadNotifications = () => {
         setUnreadCount(data.count);
       } catch (error) {
         console.error("Error fetching unread notifications count:", error);
+        setError(error.message);
+        setUnreadCount(0); // Set to 0 in case of error
       }
     };
 
@@ -31,5 +34,5 @@ export const useUnreadNotifications = () => {
     return () => clearInterval(intervalId);
   }, []);
 
-  return unreadCount;
+  return { unreadCount, error };
 };

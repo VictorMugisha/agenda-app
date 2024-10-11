@@ -25,7 +25,7 @@ router.put("/update/:id", updateGroup);
 router.delete("/delete/:id", deleteGroup);
 router.post("/join/:id", joinGroup);
 router.get("/leave/:id", leaveGroup);
-router.get('/:groupId/membership', checkGroupMembership);
+router.get('/:groupId/membership/', checkGroupMembership);
 router.get('/my-groups', getMyGroups);
 router.post('/:groupId/join', joinGroup);
 router.post('/:groupId/leave', leaveGroup);
