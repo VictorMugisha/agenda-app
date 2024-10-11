@@ -6,14 +6,14 @@ import {
   FiSearch,
   FiUser,
 } from "react-icons/fi";
-import { useProfile } from "../../hooks/useProfile";
 import { useMyGroups } from "../../hooks/useMyGroups";
 import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
 import Loading from "../../components/Loading";
 import { useEffect } from "react";
+import useUserStore from "../../store/userStore";
 
 export default function LandingPage() {
-  const { profile, loading: profileLoading, error: profileError,fetchProfile } = useProfile();
+  const { profile, loading: profileLoading, error: profileError, fetchProfile } = useUserStore();
   const { groups: recentGroups, loading: groupsLoading, error: groupsError, fetchMyGroups } = useMyGroups();
   const { unreadCount, error: notificationError } = useUnreadNotifications();
 

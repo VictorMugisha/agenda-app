@@ -1,11 +1,12 @@
 import { useEffect, useState } from "react";
-import { useProfile } from "../../hooks/useProfile";
 import { useAuth } from "../../hooks/useAuth";
 import Loading from "../../components/Loading";
 import { FiEdit, FiMail, FiPhone } from "react-icons/fi";
+import useUserStore from "../../store/userStore";
 
 export default function Profile() {
-  const { profile, loading, error, fetchProfile, updateProfile } = useProfile();
+  const { profile, loading, error, fetchProfile, updateProfile } =
+    useUserStore();
   const { removeToken } = useAuth(); 
   const [isEditing, setIsEditing] = useState(false);
   const [editedProfile, setEditedProfile] = useState({});
