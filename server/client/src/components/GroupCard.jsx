@@ -10,7 +10,7 @@ export default function GroupCard({ group }) {
   const groupDescription = group?.description || 'No description available';
   const adminName = group?.admin?.firstName || 'Unknown';
 
-  const { isMember, isAdmin, hasPendingRequest, loading, error } = useGroupMembership(groupId);
+  const { isMember, isAdmin, hasPendingRequest } = useGroupMembership(groupId);
 
   const handleClick = () => {
     if (groupId) {
@@ -25,13 +25,6 @@ export default function GroupCard({ group }) {
   if (!groupId) {
     console.error("Group object is missing '_id' or 'id' property:", group);
     return null;
-  }
-
-  if (loading) return <div className="bg-gray-100 p-4 rounded-lg">Loading...</div>;
-
-  if (error) {
-    console.error("Error checking group membership:", error);
-    return <div className="bg-red-100 p-4 rounded-lg">Error loading group</div>;
   }
 
   return (

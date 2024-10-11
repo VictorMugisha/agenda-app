@@ -3,7 +3,7 @@ import { useAvailableGroups } from "../hooks/index";
 import { useMyGroups } from "../hooks/useMyGroups";
 import GroupCard from "./GroupCard";
 import PropTypes from "prop-types";
-import Loading from "./Loading";
+import SkeletonLoader from "./SkeletonLoader"; 
 
 export default function AvailableGroups({ searchQuery }) {
   const { groups, loading, error, availableGroups } = useAvailableGroups();
@@ -17,8 +17,6 @@ export default function AvailableGroups({ searchQuery }) {
     group.name.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  if (loading) return <Loading />
-  
   if (error)
     return (
       <div className="text-center">
@@ -29,13 +27,20 @@ export default function AvailableGroups({ searchQuery }) {
   return (
     <div className="h-full overflow-y-auto scrollbar-hide">
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 pb-4">
-        {filteredGroups.map((group) => (
-          <GroupCard 
-            key={group._id} 
-            group={group} 
-            isMyGroup={myGroups.some(myGroup => myGroup._id === group._id)}
-          />
-        ))}
+        {loading ? (
+          // Display skeleton loaders while loading
+          Array.from({ length: 6 }).map((_, index) => (
+            <SkeletonLoader key={index} />
+          ))
+        ) : (
+          filteredGroups.map((group) => (
+            <GroupCard 
+              key={group._id} 
+              group={group} 
+              isMyGroup={myGroups.some(myGroup => myGroup._id === group._id)}
+            />
+          ))
+        )}
       </div>
     </div>
   );

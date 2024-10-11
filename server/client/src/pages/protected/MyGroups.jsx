@@ -2,7 +2,7 @@ import { useEffect, useState } from "react";
 import { useMyGroups } from "../../hooks/useMyGroups";
 import useDeleteGroup from "../../hooks/useDeleteGroup";
 import GroupCard from "../../components/GroupCard";
-import Loading from "../../components/Loading";
+import SkeletonLoader from "../../components/SkeletonLoader";
 import {
   Box,
   Heading,
@@ -43,7 +43,13 @@ export default function MyGroups() {
     }
   };
 
-  if (loading) return <Loading />;
+  if (loading) return (
+    <SimpleGrid columns={{ base: 1, sm: 2, md: 3 }} spacing={4}>
+      {Array.from({ length: 6 }).map((_, index) => (
+        <SkeletonLoader key={index} />
+      ))}
+    </SimpleGrid>
+  );
   if (error)
     return (
       <Box textAlign="center" color="red.500">
