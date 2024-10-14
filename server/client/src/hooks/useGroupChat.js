@@ -23,6 +23,12 @@ export const useGroupChat = (groupId) => {
     console.log("Attempting to connect to socket");
     socket.connect();
 
+    const timeoutId = setTimeout(() => {
+      setLoading(false);
+      console.log("Timed out while waiting for chat data");
+      setError("Timed out while waiting for chat data");
+    }, 10000);  // 10 seconds timeout
+
     socket.on("connect", () => {
       console.log("Socket connected");
       socket.emit("join_group", groupId);
@@ -33,10 +39,12 @@ export const useGroupChat = (groupId) => {
     socket.on("connect_error", (error) => {
       console.error("Socket connection error:", error);
       setError("Failed to connect to chat server");
+      setLoading(false);
     });
 
     socket.on("group_details", (groupData) => {
       setGroup(groupData);
+      setLoading(false);
     });
 
     socket.on("messages", (messagesData) => {
@@ -70,6 +78,7 @@ export const useGroupChat = (groupId) => {
 
     socket.on("error", (errorMessage) => {
       setError(errorMessage);
+      setLoading(false);
       toast({
         title: "Error",
         description: errorMessage,
@@ -88,6 +97,7 @@ export const useGroupChat = (groupId) => {
       socket.off("message_read");
       socket.off("error");
       socket.disconnect();
+      clearTimeout(timeoutId);
     };
   }, [groupId, currentUser, toast, markAsRead]);
 
