@@ -30,10 +30,14 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "https://victor-agenda-app.onrender.com/",
+    origin: [
+      "https://victor-agenda-app.onrender.com",
+      "http://localhost:5173",
+      "http://localhost:5174",
+    ],
     methods: ["GET", "POST", "PUT", "DELETE"],
     allowedHeaders: ["Content-Type", "Authorization"],
-    domain: "https://victor-agenda-app.onrender.com/",
+    credentials: true,
   },
 });
 
@@ -41,11 +45,14 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
-    origin: "https://victor-agenda-app.onrender.com/",
+    origin: [
+      "https://victor-agenda-app.onrender.com",
+      "http://localhost:5173",
+      "http://localhost:5174",
+    ],
     credentials: true,
     allowedHeaders: ["Content-Type", "Authorization"],
     methods: ["GET", "POST", "PUT", "DELETE"],
-    domain: "https://victor-agenda-app.onrender.com/",
   })
 );
 
@@ -148,4 +155,3 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
-
