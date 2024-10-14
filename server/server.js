@@ -30,8 +30,10 @@ const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: "https://victor-agenda-app.onrender.com/",
     methods: ["GET", "POST", "PUT", "DELETE"],
+    allowedHeaders: ["Content-Type", "Authorization"],
+    domain: "https://victor-agenda-app.onrender.com/",
   },
 });
 
@@ -39,7 +41,11 @@ app.use(cookieParser());
 app.use(express.json());
 app.use(
   cors({
-    origin: "*",
+    origin: "https://victor-agenda-app.onrender.com/",
+    credentials: true,
+    allowedHeaders: ["Content-Type", "Authorization"],
+    methods: ["GET", "POST", "PUT", "DELETE"],
+    domain: "https://victor-agenda-app.onrender.com/",
   })
 );
 
