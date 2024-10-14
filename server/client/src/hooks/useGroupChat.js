@@ -20,12 +20,19 @@ export const useGroupChat = (groupId) => {
   useEffect(() => {
     if (!currentUser || !groupId) return;
 
+    console.log("Attempting to connect to socket");
     socket.connect();
 
     socket.on("connect", () => {
+      console.log("Socket connected");
       socket.emit("join_group", groupId);
       socket.emit("fetch_group_details", groupId);
       socket.emit("fetch_messages", groupId);
+    });
+
+    socket.on("connect_error", (error) => {
+      console.error("Socket connection error:", error);
+      setError("Failed to connect to chat server");
     });
 
     socket.on("group_details", (groupData) => {
