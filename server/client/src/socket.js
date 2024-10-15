@@ -1,6 +1,11 @@
 import { io } from "socket.io-client";
+import { getDevelopmentSocketURL, getProductionSocketURL } from "./utils/utils";
+import { ENVIRONMENT } from "./constants/constants";
 
-const SOCKET_URL = "https://victor-agenda-app.onrender.com";
+const SOCKET_URL =
+  ENVIRONMENT === "development"
+    ? getDevelopmentSocketURL()
+    : getProductionSocketURL();
 
 console.log("SOCKET_URL", SOCKET_URL);
 
