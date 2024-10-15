@@ -1,4 +1,4 @@
-import { Box, Text, Button, Flex } from "@chakra-ui/react";
+import { Box, Text, Button, Flex, Badge } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 
 export default function UserCard({ user, onAddFriend, isLoading = false }) {
@@ -11,14 +11,18 @@ export default function UserCard({ user, onAddFriend, isLoading = false }) {
           </Text>
           <Text>@{user.username}</Text>
         </Box>
-        <Button
-          size="sm"
-          colorScheme="blue"
-          onClick={() => onAddFriend(user._id)}
-          isLoading={isLoading}
-        >
-          Add Friend
-        </Button>
+        {user.hasPendingRequest ? (
+          <Badge colorScheme="yellow">Pending</Badge>
+        ) : (
+          <Button
+            size="sm"
+            colorScheme="blue"
+            onClick={() => onAddFriend(user._id)}
+            isLoading={isLoading}
+          >
+            Add Friend
+          </Button>
+        )}
       </Flex>
     </Box>
   );
@@ -30,6 +34,7 @@ UserCard.propTypes = {
     firstName: PropTypes.string.isRequired,
     lastName: PropTypes.string.isRequired,
     username: PropTypes.string.isRequired,
+    hasPendingRequest: PropTypes.bool.isRequired,
   }).isRequired,
   onAddFriend: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
