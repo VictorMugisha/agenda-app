@@ -1,5 +1,6 @@
 import { Box, Text, Button, Flex, Badge } from "@chakra-ui/react";
 import PropTypes from "prop-types";
+import { Link } from "react-router-dom";
 
 export default function UserCard({ user, onAddFriend, isLoading = false }) {
   return (
@@ -11,18 +12,34 @@ export default function UserCard({ user, onAddFriend, isLoading = false }) {
           </Text>
           <Text>@{user.username}</Text>
         </Box>
-        {user.hasPendingRequest ? (
-          <Badge colorScheme="yellow">Pending</Badge>
-        ) : (
-          <Button
-            size="sm"
-            colorScheme="blue"
-            onClick={() => onAddFriend(user._id)}
-            isLoading={isLoading}
-          >
-            Add Friend
-          </Button>
-        )}
+        <Flex>
+          {user.friendStatus === "none" && (
+            <Button
+              size="sm"
+              colorScheme="blue"
+              onClick={() => onAddFriend(user._id)}
+              isLoading={isLoading}
+            >
+              Add Friend
+            </Button>
+          )}
+          {user.friendStatus === "pending" && (
+            <>
+              <Badge colorScheme="yellow" mr={2}>Pending</Badge>
+              <Button
+                size="sm"
+                colorScheme="blue"
+                as={Link}
+                to={`/app/profile/${user._id}`}
+              >
+                View
+              </Button>
+            </>
+          )}
+          {user.friendStatus === "accepted" && (
+            <Badge colorScheme="green">Friends</Badge>
+          )}
+        </Flex>
       </Flex>
     </Box>
   );
@@ -34,8 +51,11 @@ UserCard.propTypes = {
     firstName: PropTypes.string.isRequired,
     lastName: PropTypes.string.isRequired,
     username: PropTypes.string.isRequired,
-    hasPendingRequest: PropTypes.bool.isRequired,
+    friendStatus: PropTypes.oneOf(["none", "pending", "accepted"]).isRequired,
+    friendRequestId: PropTypes.string,
+    isRequester: PropTypes.bool,
   }).isRequired,
   onAddFriend: PropTypes.func.isRequired,
+  onAcceptFriend: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
 };

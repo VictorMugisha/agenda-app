@@ -64,7 +64,7 @@ app.use("/api/groups", protectedRoute, groupRoutes);
 app.use("/api/request", protectedRoute, requestRoutes);
 app.use("/api/messages", protectedRoute, messageRoutes);
 app.use("/api/notifications", protectedRoute, notificationRoutes);
-app.use("/api/friends", friendRoutes);
+app.use("/api/friends", protectedRoute,friendRoutes);
 
 // Serve the frontend client (React app)
 app.use(express.static(path.join(__dirname, "client", "dist")));

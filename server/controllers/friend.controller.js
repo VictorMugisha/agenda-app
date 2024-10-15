@@ -7,19 +7,33 @@ export const getAllUsers = async (req, res) => {
     const currentUserId = req.loggedInUser._id;
     const users = await UserModel.find({ _id: { $ne: currentUserId } }).select("-password");
     
-    const pendingRequests = await FriendModel.find({
-      requester: currentUserId,
-      status: "pending"
-    }).select("recipient");
+    const friendRequests = await FriendModel.find({
+      $or: [
+        { requester: currentUserId },
+        { recipient: currentUserId }
+      ],
+      status: { $in: ["pending", "accepted"] }
+    });
 
-    const pendingRecipients = new Set(pendingRequests.map(req => req.recipient.toString()));
+    const usersWithStatus = users.map(user => {
+      const userObj = user.toObject();
+      const request = friendRequests.find(req => 
+        (req.requester.toString() === currentUserId.toString() && req.recipient.toString() === user._id.toString()) ||
+        (req.recipient.toString() === currentUserId.toString() && req.requester.toString() === user._id.toString())
+      );
 
-    const usersWithRequestStatus = users.map(user => ({
-      ...user.toObject(),
-      hasPendingRequest: pendingRecipients.has(user._id.toString())
-    }));
+      if (request) {
+        userObj.friendStatus = request.status;
+        userObj.friendRequestId = request._id;
+        userObj.isRequester = request.requester.toString() === currentUserId.toString();
+      } else {
+        userObj.friendStatus = "none";
+      }
 
-    res.status(200).json(usersWithRequestStatus);
+      return userObj;
+    });
+
+    res.status(200).json(usersWithStatus);
   } catch (error) {
     console.error("Error fetching all users:", error);
     res.status(500).json({ message: "Internal server error" });

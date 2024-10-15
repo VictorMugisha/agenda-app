@@ -85,6 +85,13 @@ export default function LandingPage() {
                 <FiUserPlus className="text-xl mb-1" />
                 <span className="text-sm text-center">Find Friends</span>
               </Link>
+              <Link
+                to="/app/friend-requests"
+                className="flex flex-col items-center justify-center p-3 bg-yellow-100 rounded-md hover:bg-yellow-200 transition-colors"
+              >
+                <FiUserPlus className="text-xl mb-1" />
+                <span className="text-sm text-center">Friend Requests</span>
+              </Link>
             </div>
           </div>
 

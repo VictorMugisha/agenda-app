@@ -2,12 +2,13 @@ import { useState } from "react";
 import { useAllUsers } from "../../hooks/useAllUsers";
 import { useFriendRequests } from "../../hooks/useFriendRequests";
 import UserCard from "../../components/UserCard";
-import { Box, VStack, Heading, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
+import { Box, VStack, Heading, Input, InputGroup, InputLeftElement, Button } from "@chakra-ui/react";
 import { IoSearchOutline } from "react-icons/io5";
+import { Link } from "react-router-dom";
 
 export default function AllUsers() {
   const { users, loading: usersLoading, error: usersError } = useAllUsers();
-  const { sendFriendRequest, loadingUsers, error: requestError } = useFriendRequests();
+  const { sendFriendRequest, acceptFriendRequest, loadingUsers, error: requestError } = useFriendRequests();
   const [searchQuery, setSearchQuery] = useState("");
 
   const filteredUsers = users.filter((user) =>
@@ -19,6 +20,9 @@ export default function AllUsers() {
       <Heading as="h1" size="xl" mb={4}>
         All Users
       </Heading>
+      <Button as={Link} to="/app/friend-requests" colorScheme="yellow" mb={4}>
+        View Pending Friend Requests
+      </Button>
       <Box mb={4}>
         <InputGroup>
           <InputLeftElement pointerEvents="none">
@@ -48,6 +52,7 @@ export default function AllUsers() {
               key={user._id}
               user={user}
               onAddFriend={sendFriendRequest}
+              onAcceptFriend={acceptFriendRequest}
               isLoading={loadingUsers[user._id] || false}
             />
           ))}

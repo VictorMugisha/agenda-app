@@ -48,5 +48,43 @@ export const useFriendRequests = () => {
     [toast]
   );
 
-  return { sendFriendRequest, loadingUsers, error };
+  const acceptFriendRequest = useCallback(async (requestId) => {
+    setLoadingUsers(prev => ({ ...prev, [requestId]: true }));
+    setError(null);
+    try {
+      const response = await fetch("/api/friends/handle-request", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${getAuthToken()}`,
+        },
+        body: JSON.stringify({ requestId, action: "accept" }),
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to accept friend request");
+      }
+
+      toast({
+        title: "Friend request accepted",
+        status: "success",
+        duration: 3000,
+        isClosable: true,
+      });
+    } catch (err) {
+      setError(err.message);
+      toast({
+        title: "Error",
+        description: err.message,
+        status: "error",
+        duration: 3000,
+        isClosable: true,
+      });
+    } finally {
+      setLoadingUsers(prev => ({ ...prev, [requestId]: false }));
+    }
+  }, [toast]);
+
+  return { sendFriendRequest, acceptFriendRequest, loadingUsers, error };
 };
