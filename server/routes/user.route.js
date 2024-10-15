@@ -3,7 +3,6 @@ import {
   deleteUser,
   getAllUsers,
   getSingleUser,
-  updateUser,
   getProfile,
   updateProfile,
   getCurrentUser,
@@ -13,8 +12,7 @@ const router = express.Router();
 
 router.get("/", getAllUsers);
 router.get("/user/:id", getSingleUser);
-router.put("/update/:id", updateUser);
-router.delete("/delete/:id", deleteUser);
+router.delete("/delete/:id", deleteUser); 
 router.get("/profile", getProfile);
 router.put("/profile", updateProfile);
 router.get("/me", getCurrentUser);

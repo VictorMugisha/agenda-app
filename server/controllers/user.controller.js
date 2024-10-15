@@ -1,5 +1,6 @@
 import mongoose from "mongoose";
 import UserModel from "../models/user.model.js";
+import bcryptjs from "bcryptjs";
 
 export async function getAllUsers(req, res) {
   try {
@@ -26,87 +27,6 @@ export async function getSingleUser(req, res) {
     res.status(200).json(user);
   } catch (error) {
     console.log("Error in getSingleUser controller: ", error);
-    return res.status(500).json({ message: "Internal server error" });
-  }
-}
-
-export async function updateUser(req, res) {
-  try {
-    const { id: userId } = req.params;
-    if (!userId || !mongoose.Types.ObjectId.isValid(userId)) {
-      return res.status(400).json({ message: "Invalid id provided" });
-    }
-
-    const user = await UserModel.findById(userId);
-    if (!user) {
-      return res.status(404).json({ message: "User not found!" });
-    }
-
-    const {
-      firstName,
-      lastName,
-      username,
-      email,
-      phoneNumber,
-      bio,
-      profilePicture,
-      currentPassword,
-      newPassword,
-      confirmNewPassword,
-    } = req.body;
-
-    const updates = {};
-
-    if (firstName) updates.firstName = firstName;
-    if (lastName) updates.lastName = lastName;
-    if (username) updates.username = username;
-    if (email) updates.email = email;
-    if (phoneNumber) updates.phoneNumber = phoneNumber;
-    if (bio) updates.bio = bio;
-    if (profilePicture) updates.profilePicture = profilePicture;
-
-    if (currentPassword || newPassword || confirmNewPassword) {
-      if (!currentPassword || !newPassword || !confirmNewPassword) {
-        return res.status(400).json({ message: "Provide all password fields" });
-      }
-
-      const isMatch = await bcryptjs.compare(currentPassword, user.password);
-      if (!isMatch) {
-        return res
-          .status(400)
-          .json({ message: "Current password is incorrect" });
-      }
-
-      if (newPassword !== confirmNewPassword) {
-        return res.status(400).json({ message: "Passwords do not match" });
-      }
-
-      const salt = await bcrypt.genSalt(10);
-      const hashedPassword = await bcrypt.hash(newPassword, salt);
-      updates.password = hashedPassword;
-    }
-
-    if (Object.keys(updates).length === 0) {
-      return res.status(400).json({ message: "No fields to update!" });
-    }
-
-    const updatedUser = await UserModel.findByIdAndUpdate(
-      userId,
-      { $set: updates },
-      {
-        new: true,
-        runValidators: true,
-        upsert: false,
-      }
-    ).select("-password");
-
-    if (!updatedUser) {
-      return res.status(404).json({ message: "User not found!" });
-    }
-
-    res.status(200).json(updatedUser);
-  } catch (error) {
-    console.log("Error in updateUser controller: ", error);
     return res.status(500).json({ message: "Internal server error" });
   }
 }
@@ -145,24 +65,61 @@ export async function getProfile(req, res) {
 
 export async function updateProfile(req, res) {
   try {
-    const { firstName, lastName, email, phoneNumber, bio, profilePicture } = req.body;
-    
-    const updateData = {
+    const {
       firstName,
       lastName,
+      username,
       email,
       phoneNumber,
-      bio
-    };
+      bio,
+      profilePicture,
+      currentPassword,
+      newPassword,
+      confirmNewPassword,
+    } = req.body;
 
-    if (profilePicture) {
-      updateData.profilePicture = profilePicture;
+    const updates = {};
+
+    if (firstName) updates.firstName = firstName;
+    if (lastName) updates.lastName = lastName;
+    if (username) updates.username = username;
+    if (email) updates.email = email;
+    if (phoneNumber) updates.phoneNumber = phoneNumber;
+    if (bio) updates.bio = bio;
+    if (profilePicture) updates.profilePicture = profilePicture;
+
+    // Handle password update
+    if (currentPassword || newPassword || confirmNewPassword) {
+      if (!currentPassword || !newPassword || !confirmNewPassword) {
+        return res.status(400).json({ message: "Provide all password fields" });
+      }
+
+      const user = await UserModel.findById(req.loggedInUser._id);
+      const isMatch = await bcryptjs.compare(currentPassword, user.password);
+      if (!isMatch) {
+        return res.status(400).json({ message: "Current password is incorrect" });
+      }
+
+      if (newPassword !== confirmNewPassword) {
+        return res.status(400).json({ message: "Passwords do not match" });
+      }
+
+      const salt = await bcryptjs.genSalt(10);
+      const hashedPassword = await bcryptjs.hash(newPassword, salt);
+      updates.password = hashedPassword;
+    }
+
+    if (Object.keys(updates).length === 0) {
+      return res.status(400).json({ message: "No fields to update!" });
     }
 
     const updatedUser = await UserModel.findByIdAndUpdate(
       req.loggedInUser._id,
-      updateData,
-      { new: true, runValidators: true }
+      { $set: updates },
+      {
+        new: true,
+        runValidators: true,
+      }
     ).select("-password");
 
     if (!updatedUser) {
