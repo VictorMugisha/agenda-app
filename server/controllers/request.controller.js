@@ -63,6 +63,17 @@ export async function createRequest(req, res) {
     });
 
     await notification.save(notification);
+    
+    const userNotification = new NotificationModel({
+      title: "Join Request Pending",
+      content: `Your request to join the group "${group.name}" is pending. You'll be notified when the admin responds.`,
+      group: groupId,
+      author: userId,
+      recipients: [userId],
+      isRead: false,
+    });
+
+    await userNotification.save();
 
     await request.save();
 

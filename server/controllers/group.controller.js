@@ -2,7 +2,7 @@ import mongoose from "mongoose";
 import GroupModel from "../models/group.model.js";
 import UserModel from "../models/user.model.js";
 import RequestModel from "../models/request.model.js";
-import AnnouncementModel from "../models/announcement.model.js";
+import NotificationModel from "../models/notification.model.js";
 
 export async function createGroup(req, res) {
   try {
@@ -265,8 +265,36 @@ export const handleJoinRequest = async (req, res) => {
         $addToSet: { members: request.user },
       });
       request.status = "accepted";
+
+      // Create notification for accepted request
+      const acceptNotification = new NotificationModel({
+        title: "Join Request Accepted",
+        content: `Your request to join the group "${group.name}" has been accepted by ${admin.firstName} ${admin.lastName}.`,
+        group: groupId,
+        author: userId,
+        recipients: [request.user],
+        isRead: false,
+      });
+      await acceptNotification.save();
+
+      // Add group to user's groupsJoined
+      await UserModel.findByIdAndUpdate(request.user, {
+        $addToSet: { groupsJoined: groupId },
+      });
     } else if (action === "reject") {
       request.status = "rejected";
+
+      // Create notification for rejected request
+      const rejectNotification = new NotificationModel({
+        title: "Join Request Rejected",
+        content: `Your request to join the group "${group.name}" has been rejected by ${admin.firstName} ${admin.lastName}.`,
+        group: groupId,
+        author: userId,
+        recipients: [request.user],
+        isRead: false,
+      });
+      await rejectNotification.save();
+      
     } else {
       return res.status(400).json({ message: "Invalid action" });
     }
@@ -376,6 +404,20 @@ export const removeMemberFromGroup = async (req, res) => {
     await UserModel.findByIdAndUpdate(memberId, {
       $pull: { groupsJoined: groupId },
     });
+
+    const admin = await UserModel.findById(adminId).select(
+      "firstName lastName"
+    );
+    const notification = new NotificationModel({
+      title: "Removed from Group",
+      content: `You have been removed from the group "${group.name}" by ${admin.firstName} ${admin.lastName}.`,
+      group: groupId,
+      author: adminId,
+      recipients: [memberId],
+      isRead: false,
+    });
+
+    await notification.save();
 
     res.status(200).json({ message: "Member removed successfully" });
   } catch (error) {
