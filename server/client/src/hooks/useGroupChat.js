@@ -3,6 +3,8 @@ import { useCurrentUser } from "./useCurrentUser";
 import { useToast } from "@chakra-ui/react";
 import socket from "../socket";
 
+const MESSAGES_PER_PAGE = 50;
+
 export const useGroupChat = (groupId) => {
   const toast = useToast();
   const [messages, setMessages] = useState([]);
@@ -11,6 +13,8 @@ export const useGroupChat = (groupId) => {
   const [error, setError] = useState(null);
   const { currentUser } = useCurrentUser();
   const [connectionAttempts, setConnectionAttempts] = useState(0);
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
   const maxRetries = 3;
   const connectionTimeout = 10000; // 10 seconds
 
@@ -19,6 +23,13 @@ export const useGroupChat = (groupId) => {
       socket.emit("mark_as_read", { messageId, userId: currentUser._id, groupId });
     }
   }, [currentUser, groupId]);
+
+  const loadMoreMessages = useCallback(() => {
+    if (hasMore && !loading) {
+      setPage(prevPage => prevPage + 1);
+      socket.emit("fetch_messages", { groupId, page: page + 1, limit: MESSAGES_PER_PAGE });
+    }
+  }, [groupId, hasMore, loading, page]);
 
   useEffect(() => {
     if (!currentUser || !groupId) return;
@@ -32,6 +43,8 @@ export const useGroupChat = (groupId) => {
       connectionTimer = setTimeout(() => {
         if (socket.connected) {
           console.log("Socket connected successfully");
+          // Register user after successful connection
+          socket.emit("register_user", { userId: currentUser._id, username: currentUser.username });
         } else {
           console.log("Socket connection timed out");
           if (connectionAttempts < maxRetries) {
@@ -51,9 +64,11 @@ export const useGroupChat = (groupId) => {
     socket.on("connect", () => {
       console.log(`Socket connected after ${connectionAttempts} attempts`);
       clearTimeout(connectionTimer);
+      // Register user after connection
+      socket.emit("register_user", { userId: currentUser._id, username: currentUser.username });
       socket.emit("join_group", groupId);
       socket.emit("fetch_group_details", groupId);
-      socket.emit("fetch_messages", groupId);
+      socket.emit("fetch_messages", { groupId, page: 1, limit: MESSAGES_PER_PAGE });
     });
 
     socket.on("connect_error", (error) => {
@@ -67,11 +82,12 @@ export const useGroupChat = (groupId) => {
       setLoading(false);
     });
 
-    socket.on("messages", (messagesData) => {
-      setMessages(messagesData);
+    socket.on("messages", ({ messages: newMessages, hasMore: moreMessages }) => {
+      setMessages(prevMessages => [...prevMessages, ...newMessages]);
+      setHasMore(moreMessages);
       setLoading(false);
       // Mark unread messages as read
-      messagesData.forEach(message => {
+      newMessages.forEach(message => {
         if (!message.readBy.includes(currentUser._id)) {
           markAsRead(message._id);
         }
@@ -144,5 +160,7 @@ export const useGroupChat = (groupId) => {
     sendMessage,
     currentUserId: currentUser?._id,
     markAsRead,
+    loadMoreMessages,
+    hasMore
   };
 };

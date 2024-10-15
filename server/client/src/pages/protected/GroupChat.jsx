@@ -1,5 +1,5 @@
 /* eslint-disable no-unused-vars */
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
 import { useParams, Link } from "react-router-dom";
 import { useGroupChat } from "../../hooks/useGroupChat";
 import Loading from "../../components/Loading";
@@ -17,19 +17,61 @@ import {
   useDisclosure
 } from "@chakra-ui/react";
 
+const MESSAGES_PER_PAGE = 50;
+
 export default function GroupChat() {
   const { groupId } = useParams();
-  const { group, messages, loading, error, sendMessage, currentUserId, markAsRead } = useGroupChat(groupId);
+  const { 
+    group, 
+    messages, 
+    loading, 
+    error, 
+    sendMessage, 
+    currentUserId, 
+    markAsRead,
+    loadMoreMessages,
+    hasMore
+  } = useGroupChat(groupId);
   const [newMessage, setNewMessage] = useState("");
   const chatContainerRef = useRef(null);
   const [selectedMessage, setSelectedMessage] = useState(null);
   const { isOpen, onOpen, onClose } = useDisclosure();
+  const observerRef = useRef(null);
 
-  useEffect(() => {
+  const scrollToBottom = useCallback(() => {
     if (chatContainerRef.current) {
       chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
-  }, [messages]);
+  }, []);
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages, scrollToBottom]);
+
+  useEffect(() => {
+    const options = {
+      root: chatContainerRef.current,
+      rootMargin: '20px',
+      threshold: 1.0
+    };
+
+    observerRef.current = new IntersectionObserver((entries) => {
+      if (entries[0].isIntersecting && hasMore) {
+        loadMoreMessages();
+      }
+    }, options);
+
+    const firstMessage = chatContainerRef.current?.firstElementChild;
+    if (firstMessage) {
+      observerRef.current.observe(firstMessage);
+    }
+
+    return () => {
+      if (observerRef.current) {
+        observerRef.current.disconnect();
+      }
+    };
+  }, [hasMore, loadMoreMessages]);
 
   const handleSendMessage = (e) => {
     e.preventDefault();
@@ -44,7 +86,7 @@ export default function GroupChat() {
     onOpen();
   };
 
-  if (loading) return <Loading />;
+  if (loading && messages.length === 0) return <Loading />;
   if (error) return <div className="text-center text-red-500">{error}</div>;
   if (!group) return <div className="text-center">Group not found.</div>;
 
@@ -65,6 +107,7 @@ export default function GroupChat() {
 
       {/* Chat messages */}
       <div ref={chatContainerRef} className="flex-1 overflow-y-auto p-4">
+        {loading && hasMore && <div className="text-center">Loading more messages...</div>}
         {messages.map((message) => (
           <div 
             key={message._id}

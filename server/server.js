@@ -70,51 +70,76 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
 });
 
-io.on("connection", (socket) => {
-  console.log(`New socket connection: ${socket.id} at ${new Date().toISOString()}`);
+const socketToUser = new Map();
 
-  socket.on("join_group", (groupId) => {
-    console.log(`Socket ${socket.id} joining group ${groupId} at ${new Date().toISOString()}`);
+io.on("connection", (socket) => {
+  console.log(`New socket connection: ${socket.id}`);
+
+  socket.on("register_user", ({ userId, username }) => {
+    socketToUser.set(socket.id, { userId, username });
+    console.log(`User ${username} (${userId}) connected with socket ${socket.id}`);
+  });
+
+  socket.on("join_group", async (groupId) => {
+    const user = socketToUser.get(socket.id);
+    const group = await GroupModel.findById(groupId).select('name').lean();
+    console.log(`User ${user?.username || 'Unknown'} (Socket ${socket.id}) joining group ${group?.name || 'Unknown'} (${groupId})`);
     socket.join(groupId);
   });
 
-  socket.on("leave_group", (groupId) => {
-    console.log(`Socket ${socket.id} leaving group ${groupId} at ${new Date().toISOString()}`);
+  socket.on("leave_group", async (groupId) => {
+    const user = socketToUser.get(socket.id);
+    const group = await GroupModel.findById(groupId).select('name').lean();
+    console.log(`User ${user?.username || 'Unknown'} (Socket ${socket.id}) leaving group ${group?.name || 'Unknown'} (${groupId})`);
     socket.leave(groupId);
   });
 
   socket.on("fetch_group_details", async (groupId) => {
-    console.log(`Fetching group details for ${groupId} at ${new Date().toISOString()}`);
+    const user = socketToUser.get(socket.id);
+    console.log(`User ${user?.username || 'Unknown'} fetching details for group ${groupId}`);
     try {
-      const group = await GroupModel.findById(groupId).populate(
-        "members",
-        "firstName lastName"
-      );
+      const group = await GroupModel.findById(groupId).select('name members').lean();
       if (!group) {
-        console.log(`Group not found: ${groupId}`);
-        socket.emit("error", "Group not found");
+        console.log(`Group ${groupId} not found`);
+        socket.emit('error', 'Group not found');
       } else {
-        console.log(`Emitting group details for ${groupId}`);
-        socket.emit("group_details", group);
+        console.log(`Emitting group details for ${group.name} (${groupId}) to ${user?.username || 'Unknown'}`);
+        socket.emit('group_details', group);
       }
     } catch (error) {
-      console.error(`Error fetching group details: ${error.message}`);
-      socket.emit("error", "Failed to fetch group details");
+      console.error(`Error fetching group details for ${groupId}:`, error);
+      socket.emit('error', 'Failed to fetch group details');
     }
   });
 
-  socket.on("fetch_messages", async (groupId) => {
+  socket.on("fetch_messages", async ({ groupId, page, limit }) => {
+    const user = socketToUser.get(socket.id);
+    const group = await GroupModel.findById(groupId).select('name').lean();
+    console.log(`User ${user?.username || 'Unknown'} fetching messages for group ${group?.name || 'Unknown'} (${groupId}), page ${page}`);
     try {
+      const skip = (page - 1) * limit;
       const messages = await MessageModel.find({ group: groupId })
-        .sort({ createdAt: 1 })
-        .populate("sender", "firstName lastName username");
-      socket.emit("messages", messages);
+        .sort({ createdAt: -1 })
+        .skip(skip)
+        .limit(limit)
+        .populate('sender', 'firstName lastName username')
+        .lean();
+
+      const totalMessages = await MessageModel.countDocuments({ group: groupId });
+      const hasMore = totalMessages > skip + messages.length;
+
+      console.log(`Emitting ${messages.length} messages to ${user?.username || 'Unknown'} for group ${group?.name || 'Unknown'}`);
+      socket.emit('messages', { messages: messages.reverse(), hasMore });
     } catch (error) {
-      socket.emit("error", "Failed to fetch messages");
+      console.error(`Error fetching messages for group ${group?.name || 'Unknown'} (${groupId}):`, error);
+      socket.emit('error', 'Failed to fetch messages');
     }
   });
 
   socket.on("send_message", async ({ content, groupId, senderId }) => {
+    const user = socketToUser.get(socket.id);
+    const group = await GroupModel.findById(groupId).select('name').lean();
+    console.log(`User ${user?.username || 'Unknown'} sending message to group ${group?.name || 'Unknown'} (${groupId})`);
     try {
       const newMessage = new MessageModel({
         content,
@@ -122,45 +147,61 @@ io.on("connection", (socket) => {
         group: groupId,
       });
       await newMessage.save();
-      await newMessage.populate("sender", "firstName lastName username");
-      io.to(groupId).emit("receive_message", newMessage);
+      const populatedMessage = await newMessage.populate('sender', 'firstName lastName username');
+      console.log(`New message sent by ${user?.username || 'Unknown'} to group ${group?.name || 'Unknown'} (${groupId})`);
+      io.to(groupId).emit('receive_message', populatedMessage);
     } catch (error) {
-      socket.emit("error", "Failed to send message");
+      console.error(`Error sending message to group ${group?.name || 'Unknown'} (${groupId}):`, error);
+      socket.emit('error', 'Failed to send message');
     }
   });
 
   socket.on("mark_as_read", async ({ messageId, userId, groupId }) => {
+    const user = socketToUser.get(socket.id);
     try {
       const updatedMessage = await MessageModel.findByIdAndUpdate(
         messageId,
         { $addToSet: { readBy: userId } },
         { new: true }
       );
+      console.log(`Message ${messageId} marked as read by ${user?.username || 'Unknown'} in group ${groupId}`);
       io.to(groupId).emit("message_read", { messageId, userId });
     } catch (error) {
+      console.error(`Error marking message as read: ${error}`);
       socket.emit("error", "Failed to mark message as read");
     }
   });
 
   socket.on("mark_all_as_read", async ({ userId, groupId }) => {
+    const user = socketToUser.get(socket.id);
     try {
       await MessageModel.updateMany(
         { group: groupId, readBy: { $ne: userId } },
         { $addToSet: { readBy: userId } }
       );
       const updatedMessages = await MessageModel.find({ group: groupId });
+      console.log(`All messages marked as read by ${user?.username || 'Unknown'} in group ${groupId}`);
       io.to(groupId).emit("messages", updatedMessages);
     } catch (error) {
+      console.error(`Error marking all messages as read: ${error}`);
       socket.emit("error", "Failed to mark all messages as read");
     }
   });
 
   socket.on("error", (errorMessage) => {
+    const user = socketToUser.get(socket.id);
+    console.error(`Error for user ${user?.username || 'Unknown'}: ${errorMessage}`);
     socket.emit("error", errorMessage);
   });
 
   socket.on("disconnect", () => {
-    console.log(`Socket ${socket.id} disconnected at ${new Date().toISOString()}`);
+    const user = socketToUser.get(socket.id);
+    if (user) {
+      console.log(`User ${user.username} (Socket ${socket.id}) disconnected`);
+      socketToUser.delete(socket.id);
+    } else {
+      console.log(`Socket ${socket.id} disconnected`);
+    }
   });
 });
 
