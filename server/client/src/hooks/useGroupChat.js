@@ -10,6 +10,7 @@ export const useGroupChat = (groupId) => {
   const [messages, setMessages] = useState([]);
   const [group, setGroup] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [loadingMessage, setLoadingMessage] = useState("Initializing chat...");
   const [error, setError] = useState(null);
   const { currentUser } = useCurrentUser();
   const [connectionAttempts, setConnectionAttempts] = useState(0);
@@ -26,6 +27,8 @@ export const useGroupChat = (groupId) => {
 
   const loadMoreMessages = useCallback(() => {
     if (hasMore && !loading) {
+      setLoading(true);
+      setLoadingMessage("Loading more messages...");
       setPage(prevPage => prevPage + 1);
       socket.emit("fetch_messages", { groupId, page: page + 1, limit: MESSAGES_PER_PAGE });
     }
@@ -37,13 +40,15 @@ export const useGroupChat = (groupId) => {
     let connectionTimer;
 
     const connectSocket = () => {
+      setLoading(true);
+      setLoadingMessage(`Connecting to chat server (Attempt ${connectionAttempts + 1})...`);
       console.log(`Attempting to connect to socket (Attempt ${connectionAttempts + 1})`);
       socket.connect();
 
       connectionTimer = setTimeout(() => {
         if (socket.connected) {
           console.log("Socket connected successfully");
-          // Register user after successful connection
+          setLoadingMessage("Registering user...");
           socket.emit("register_user", { userId: currentUser._id, username: currentUser.username });
         } else {
           console.log("Socket connection timed out");
@@ -64,10 +69,12 @@ export const useGroupChat = (groupId) => {
     socket.on("connect", () => {
       console.log(`Socket connected after ${connectionAttempts} attempts`);
       clearTimeout(connectionTimer);
-      // Register user after connection
+      setLoadingMessage("Joining group chat...");
       socket.emit("register_user", { userId: currentUser._id, username: currentUser.username });
       socket.emit("join_group", groupId);
+      setLoadingMessage("Fetching group details...");
       socket.emit("fetch_group_details", groupId);
+      setLoadingMessage("Fetching messages...");
       socket.emit("fetch_messages", { groupId, page: 1, limit: MESSAGES_PER_PAGE });
     });
 
@@ -79,13 +86,14 @@ export const useGroupChat = (groupId) => {
 
     socket.on("group_details", (groupData) => {
       setGroup(groupData);
-      setLoading(false);
+      setLoadingMessage("Group details received, waiting for messages...");
     });
 
     socket.on("messages", ({ messages: newMessages, hasMore: moreMessages }) => {
       setMessages(prevMessages => [...prevMessages, ...newMessages]);
       setHasMore(moreMessages);
       setLoading(false);
+      setLoadingMessage("");
       // Mark unread messages as read
       newMessages.forEach(message => {
         if (!message.readBy.includes(currentUser._id)) {
@@ -115,6 +123,7 @@ export const useGroupChat = (groupId) => {
     socket.on("error", (errorMessage) => {
       setError(errorMessage);
       setLoading(false);
+      setLoadingMessage("");
       toast({
         title: "Error",
         description: errorMessage,
@@ -156,6 +165,7 @@ export const useGroupChat = (groupId) => {
     group,
     messages,
     loading,
+    loadingMessage,
     error,
     sendMessage,
     currentUserId: currentUser?._id,

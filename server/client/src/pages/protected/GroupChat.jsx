@@ -30,7 +30,8 @@ export default function GroupChat() {
     currentUserId, 
     markAsRead,
     loadMoreMessages,
-    hasMore
+    hasMore,
+    loadingMessage
   } = useGroupChat(groupId);
   const [newMessage, setNewMessage] = useState("");
   const chatContainerRef = useRef(null);
@@ -87,6 +88,7 @@ export default function GroupChat() {
   };
 
   if (loading && messages.length === 0) return <Loading />;
+  if (loadingMessage) return <div className="text-center italic">{loadingMessage}</div>;
   if (error) return <div className="text-center text-red-500">{error}</div>;
   if (!group) return <div className="text-center">Group not found.</div>;
 
