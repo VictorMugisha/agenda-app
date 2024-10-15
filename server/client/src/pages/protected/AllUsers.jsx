@@ -1,40 +1,63 @@
+import { useState } from "react";
 import { useAllUsers } from "../../hooks/useAllUsers";
-import Loading from "../../components/Loading";
-import { Box, VStack, Text, Heading, Button, Flex } from "@chakra-ui/react";
+import { useFriendRequests } from "../../hooks/useFriendRequests";
+import UserCard from "../../components/UserCard";
+import { Box, VStack, Heading, Input, InputGroup, InputLeftElement } from "@chakra-ui/react";
+import { IoSearchOutline } from "react-icons/io5";
 
 export default function AllUsers() {
-  const { users, loading, error } = useAllUsers();
+  const { users, loading: usersLoading, error: usersError } = useAllUsers();
+  const { sendFriendRequest, loadingUsers, error: requestError } = useFriendRequests();
+  const [searchQuery, setSearchQuery] = useState("");
 
-  if (loading) return <Loading />;
-  if (error)
-    return (
-      <Box textAlign="center" color="red.500">
-        {error}
-      </Box>
-    );
+  const filteredUsers = users.filter((user) =>
+    `${user.firstName} ${user.lastName} ${user.username}`.toLowerCase().includes(searchQuery.toLowerCase())
+  );
 
   return (
     <Box maxW="xl" mx="auto" p={4}>
       <Heading as="h1" size="xl" mb={4}>
         All Users
       </Heading>
-      <VStack spacing={4} align="stretch">
-        {users.map((user) => (
-          <Box key={user._id} p={4} borderWidth={1} borderRadius="md">
-            <Flex justify="space-between" align="center">
-              <Box>
-                <Text fontWeight="bold">
-                  {user.firstName} {user.lastName}
-                </Text>
-                <Text>@{user.username}</Text>
-              </Box>
-              <Button size="sm" colorScheme="blue">
-                Add Friend
-              </Button>
-            </Flex>
-          </Box>
-        ))}
-      </VStack>
+      <Box mb={4}>
+        <InputGroup>
+          <InputLeftElement pointerEvents="none">
+            <IoSearchOutline />
+          </InputLeftElement>
+          <Input
+            placeholder="Search users..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </InputGroup>
+      </Box>
+      {usersLoading ? (
+        <VStack spacing={4} align="stretch">
+          {[...Array(5)].map((_, index) => (
+            <Box key={index} height="80px" bg="gray.100" borderRadius="md" />
+          ))}
+        </VStack>
+      ) : usersError ? (
+        <Box textAlign="center" color="red.500">
+          {usersError}
+        </Box>
+      ) : (
+        <VStack spacing={4} align="stretch">
+          {filteredUsers.map((user) => (
+            <UserCard
+              key={user._id}
+              user={user}
+              onAddFriend={sendFriendRequest}
+              isLoading={loadingUsers[user._id] || false}
+            />
+          ))}
+        </VStack>
+      )}
+      {requestError && (
+        <Box textAlign="center" color="red.500" mt={4}>
+          {requestError}
+        </Box>
+      )}
     </Box>
   );
 }

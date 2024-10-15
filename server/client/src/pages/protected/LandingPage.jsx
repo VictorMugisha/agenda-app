@@ -5,6 +5,7 @@ import {
   FiBell,
   FiSearch,
   FiUser,
+  FiUserPlus,
 } from "react-icons/fi";
 import { useMyGroups } from "../../hooks/useMyGroups";
 import { useUnreadNotifications } from "../../hooks/useUnreadNotifications";
@@ -43,7 +44,7 @@ export default function LandingPage() {
         <div className="space-y-6">
           <div className="bg-white p-4 rounded-lg shadow-md">
             <h2 className="text-lg font-semibold mb-3">Quick Actions</h2>
-            <div className="grid grid-cols-2 gap-3">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               <Link
                 to="/app/mygroups"
                 className="flex flex-col items-center justify-center p-3 bg-blue-100 rounded-md hover:bg-blue-200 transition-colors"
@@ -76,6 +77,13 @@ export default function LandingPage() {
                     {unreadCount}
                   </span>
                 )}
+              </Link>
+              <Link
+                to="/app/users"
+                className="flex flex-col items-center justify-center p-3 bg-indigo-100 rounded-md hover:bg-indigo-200 transition-colors"
+              >
+                <FiUserPlus className="text-xl mb-1" />
+                <span className="text-sm text-center">Find Friends</span>
               </Link>
             </div>
           </div>
