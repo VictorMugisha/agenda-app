@@ -8,7 +8,7 @@
     "server": "npm run build --prefix ./server/client && nodemon server/server.js",
     "devServer": "npm run build --prefix ./server/client && nodemon server/dev.server.js",
     "start": "node server/server.js",
-    "build": "npm install --prefix ./server/client && npm run build --prefix ./server/client && npm install"
+    "build": "npm install --prefix ./server/client && npm run build --prefix ./server/client && npm install && npm run start"
   },
   "keywords": [],
   "author": "",
