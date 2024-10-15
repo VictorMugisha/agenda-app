@@ -71,7 +71,10 @@ app.get("*", (req, res) => {
 });
 
 io.on("connection", (socket) => {
+  console.log("New socket connection:", socket.id);
+
   socket.on("join_group", (groupId) => {
+    console.log(`Socket ${socket.id} joining group ${groupId}`);
     socket.join(groupId);
   });
 
