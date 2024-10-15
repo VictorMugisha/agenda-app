@@ -1,7 +1,7 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { CLOUD_NAME, UPLOAD_PRESET } from "../constants/constants";
-import { FiEye, FiEyeOff } from "react-icons/fi"; // Add this import
+import { Link } from "react-router-dom";
+import { FiEye, FiEyeOff } from "react-icons/fi";
+import useRegister from "../hooks/useRegister";
 
 export default function Register() {
   const [formData, setFormData] = useState({
@@ -11,16 +11,14 @@ export default function Register() {
     username: "",
     password: "",
     confirmPassword: "",
-    profilePicture: null,
   });
 
   const [profileImage, setProfileImage] = useState(null);
-  const [uploadingImage, setUploadingImage] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const navigate = useNavigate();
-
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+
+  const { loading, register } = useRegister();
 
   const handleChange = (e) => {
     const { name, value } = e.target;
@@ -40,55 +38,9 @@ export default function Register() {
     }
 
     try {
-      let profileImageUrl = null;
-
-      if (profileImage) {
-        setUploadingImage(true);
-
-        const fileData = new FormData();
-        fileData.append("file", profileImage);
-        fileData.append("cloud_name", CLOUD_NAME);
-        fileData.append("upload_preset", UPLOAD_PRESET);
-
-        const res = await fetch(
-          "https://api.cloudinary.com/v1_1/victormugisha/image/upload",
-          {
-            method: "POST",
-            body: fileData,
-          }
-        );
-
-        const data = await res.json();
-        profileImageUrl = data.url;
-
-        setUploadingImage(false);
-      }
-
-      // Prepare form data for submission
-      const finalFormData = {
-        ...formData,
-        profilePicture: profileImageUrl,
-      };
-
-      // Submit form data to backend
-      const response = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(finalFormData),
-      });
-
-      const result = await response.json();
-
-      if (!response.ok) {
-        throw new Error(result.message || "Something went wrong!");
-      }
-
-      navigate("/login");
+      await register(formData, profileImage);
     } catch (error) {
-      console.error("Error:", error);
-      setUploadingImage(false);
+      setErrorMessage(error.message || "An error occurred during registration.");
     }
   };
 
@@ -217,11 +169,6 @@ export default function Register() {
               onChange={handleFileChange}
               className="file-input file-input-bordered w-full"
             />
-            {uploadingImage && (
-              <p className="text-blue-500 text-center mt-2">
-                Uploading image...
-              </p>
-            )}
           </div>
 
           {/* Submit Button */}
@@ -229,9 +176,9 @@ export default function Register() {
             <button
               type="submit"
               className="btn w-full bg-green-500 text-white py-2 rounded hover:bg-green-600"
-              disabled={uploadingImage}
+              disabled={loading}
             >
-              Register
+              {loading ? "Registering..." : "Register"}
             </button>
           </div>
         </form>
