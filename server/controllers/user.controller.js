@@ -145,10 +145,23 @@ export async function getProfile(req, res) {
 
 export async function updateProfile(req, res) {
   try {
-    const { firstName, lastName, email, phoneNumber, bio } = req.body;
+    const { firstName, lastName, email, phoneNumber, bio, profilePicture } = req.body;
+    
+    const updateData = {
+      firstName,
+      lastName,
+      email,
+      phoneNumber,
+      bio
+    };
+
+    if (profilePicture) {
+      updateData.profilePicture = profilePicture;
+    }
+
     const updatedUser = await UserModel.findByIdAndUpdate(
       req.loggedInUser._id,
-      { firstName, lastName, email, phoneNumber, bio },
+      updateData,
       { new: true, runValidators: true }
     ).select("-password");
 
