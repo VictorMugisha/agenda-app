@@ -64,10 +64,10 @@ app.use("/api/messages", protectedRoute, messageRoutes);
 app.use("/api/notifications", protectedRoute, notificationRoutes);
 
 // Serve the frontend client (React app)
-app.use(express.static(path.join(__dirname, "/client/dist")));
+app.use(express.static(path.join(__dirname, "client", "dist")));
 
 app.get("*", (req, res) => {
-  return res.sendFile(path.join(__dirname, "/client/dist/index.html"));
+  res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
 });
 
 console.log("VITE_SOCKET_URL:", import.meta.env.VITE_SOCKET_URL);

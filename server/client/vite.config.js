@@ -9,6 +9,12 @@ const __dirname = path.dirname(__filename);
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react()],
+  define: {
+    "import.meta.env.VITE_SOCKET_URL": JSON.stringify(
+      import.meta.env.VITE_SOCKET_URL ||
+        "https://victor-agenda-app.onrender.com"
+    ),
+  },
   server: {
     proxy: {
       "/api": {
