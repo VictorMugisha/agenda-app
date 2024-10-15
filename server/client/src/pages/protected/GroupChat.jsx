@@ -87,8 +87,12 @@ export default function GroupChat() {
     onOpen();
   };
 
-  if (loading && messages.length === 0) return <Loading />;
-  if (loadingMessage) return <div className="text-center italic">{loadingMessage}</div>;
+  if (loading) return (
+    <div className="flex flex-col h-[calc(100vh-4rem)]">
+      <Loading />
+      <div className="text-center italic">{loadingMessage}</div>
+    </div>
+  );
   if (error) return <div className="text-center text-red-500">{error}</div>;
   if (!group) return <div className="text-center">Group not found.</div>;
 
