@@ -10,6 +10,9 @@ export const useGroupChat = (groupId) => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const { currentUser } = useCurrentUser();
+  const [connectionAttempts, setConnectionAttempts] = useState(0);
+  const maxRetries = 3;
+  const connectionTimeout = 10000; // 10 seconds
 
   const markAsRead = useCallback((messageId) => {
     if (currentUser && currentUser._id) {
@@ -20,11 +23,34 @@ export const useGroupChat = (groupId) => {
   useEffect(() => {
     if (!currentUser || !groupId) return;
 
-    console.log("Attempting to connect to socket");
-    socket.connect();
+    let connectionTimer;
+
+    const connectSocket = () => {
+      console.log(`Attempting to connect to socket (Attempt ${connectionAttempts + 1})`);
+      socket.connect();
+
+      connectionTimer = setTimeout(() => {
+        if (socket.connected) {
+          console.log("Socket connected successfully");
+        } else {
+          console.log("Socket connection timed out");
+          if (connectionAttempts < maxRetries) {
+            setConnectionAttempts(prev => prev + 1);
+            socket.disconnect();
+            connectSocket();
+          } else {
+            setError("Failed to connect to chat server after multiple attempts");
+            setLoading(false);
+          }
+        }
+      }, connectionTimeout);
+    };
+
+    connectSocket();
 
     socket.on("connect", () => {
-      console.log("Socket connected");
+      console.log(`Socket connected after ${connectionAttempts} attempts`);
+      clearTimeout(connectionTimer);
       socket.emit("join_group", groupId);
       socket.emit("fetch_group_details", groupId);
       socket.emit("fetch_messages", groupId);
@@ -83,6 +109,7 @@ export const useGroupChat = (groupId) => {
     });
 
     return () => {
+      clearTimeout(connectionTimer);
       socket.emit("leave_group", groupId);
       socket.off("connect");
       socket.off("group_details");
@@ -92,7 +119,7 @@ export const useGroupChat = (groupId) => {
       socket.off("error");
       socket.disconnect();
     };
-  }, [groupId, currentUser, toast, markAsRead]);
+  }, [groupId, currentUser, toast, markAsRead, connectionAttempts]);
 
   const sendMessage = useCallback((content) => {
     if (!currentUser) {

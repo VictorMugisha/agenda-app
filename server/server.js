@@ -71,29 +71,34 @@ app.get("*", (req, res) => {
 });
 
 io.on("connection", (socket) => {
-  console.log("New socket connection:", socket.id);
+  console.log(`New socket connection: ${socket.id} at ${new Date().toISOString()}`);
 
   socket.on("join_group", (groupId) => {
-    console.log(`Socket ${socket.id} joining group ${groupId}`);
+    console.log(`Socket ${socket.id} joining group ${groupId} at ${new Date().toISOString()}`);
     socket.join(groupId);
   });
 
   socket.on("leave_group", (groupId) => {
+    console.log(`Socket ${socket.id} leaving group ${groupId} at ${new Date().toISOString()}`);
     socket.leave(groupId);
   });
 
   socket.on("fetch_group_details", async (groupId) => {
+    console.log(`Fetching group details for ${groupId} at ${new Date().toISOString()}`);
     try {
       const group = await GroupModel.findById(groupId).populate(
         "members",
         "firstName lastName"
       );
       if (!group) {
+        console.log(`Group not found: ${groupId}`);
         socket.emit("error", "Group not found");
       } else {
+        console.log(`Emitting group details for ${groupId}`);
         socket.emit("group_details", group);
       }
     } catch (error) {
+      console.error(`Error fetching group details: ${error.message}`);
       socket.emit("error", "Failed to fetch group details");
     }
   });
@@ -152,6 +157,10 @@ io.on("connection", (socket) => {
 
   socket.on("error", (errorMessage) => {
     socket.emit("error", errorMessage);
+  });
+
+  socket.on("disconnect", () => {
+    console.log(`Socket ${socket.id} disconnected at ${new Date().toISOString()}`);
   });
 });
 
