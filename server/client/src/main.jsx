@@ -22,6 +22,7 @@ import customTheme from "./chakra/theme.js";
 import GroupChat from "./pages/protected/GroupChat.jsx";
 import GroupMembers from "./pages/protected/GroupMembers.jsx";
 import LandingPage from "./pages/protected/LandingPage.jsx";
+import AllUsers from "./pages/protected/AllUsers.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -39,6 +40,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="home" element={<HomePage />} />
               <Route path="notifications" element={<Notifications />} />
               <Route path="create" element={<CreateGroup />} />
+              <Route path="users" element={<AllUsers />} />
               <Route path="mygroups" element={<MyGroups />} />
               <Route path="group/:id" element={<GroupDetailsPage />} />
               <Route path="profile" element={<Profile />} />
