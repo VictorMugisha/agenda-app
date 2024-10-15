@@ -70,8 +70,6 @@ app.get("*", (req, res) => {
   res.sendFile(path.join(__dirname, "client", "dist", "index.html"));
 });
 
-console.log("VITE_SOCKET_URL:", import.meta.env.VITE_SOCKET_URL);
-
 io.on("connection", (socket) => {
   console.log("New socket connection:", socket.id);
 
