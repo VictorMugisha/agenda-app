@@ -26,6 +26,8 @@ import AllUsers from "./pages/protected/AllUsers.jsx";
 import PendingFriendRequests from "./pages/protected/PendingFriendRequests.jsx";
 import NotFound from "./pages/NotFound.jsx";
 import UserProfile from "./pages/protected/UserProfile.jsx";
+import Friends from "./pages/protected/Friends.jsx";
+import ChatRoom from "./pages/protected/ChatRoom.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -52,6 +54,8 @@ createRoot(document.getElementById("root")).render(
               <Route path="group/:id" element={<GroupDetailsPage />} />
               <Route path="profile" element={<Profile />} />
               <Route path="profile/:userId" element={<UserProfile />} />
+              <Route path="friends" element={<Friends />} />
+              <Route path="/app/chat/:friendId" element={<ChatRoom />} />
               <Route path="group/:groupId/chat" element={<GroupChat />} />
               <Route path="group/:groupId/members" element={<GroupMembers />} />
             </Route>
