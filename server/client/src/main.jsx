@@ -24,6 +24,7 @@ import GroupMembers from "./pages/protected/GroupMembers.jsx";
 import LandingPage from "./pages/protected/LandingPage.jsx";
 import AllUsers from "./pages/protected/AllUsers.jsx";
 import PendingFriendRequests from "./pages/protected/PendingFriendRequests.jsx";
+import NotFound from "./pages/NotFound.jsx";
 
 createRoot(document.getElementById("root")).render(
   <StrictMode>
@@ -52,7 +53,7 @@ createRoot(document.getElementById("root")).render(
               <Route path="group/:groupId/chat" element={<GroupChat />} />
               <Route path="group/:groupId/members" element={<GroupMembers />} />
             </Route>
-            <Route path="*" element={<h1>Not Found</h1>} />
+            <Route path="*" element={<NotFound />} />
           </Routes>
         </ChakraProvider>
       </AuthContextProvider>
