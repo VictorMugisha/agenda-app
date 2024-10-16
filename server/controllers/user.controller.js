@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import UserModel from "../models/user.model.js";
 import bcryptjs from "bcryptjs";
+import FriendModel from "../models/friend.model.js";
 
 export async function getAllUsers(req, res) {
   try {
@@ -15,16 +16,33 @@ export async function getAllUsers(req, res) {
 export async function getSingleUser(req, res) {
   try {
     const { id: userId } = req.params;
+    const currentUserId = req.loggedInUser._id;
+
     if (!mongoose.Types.ObjectId.isValid(userId) || !userId) {
       return res.status(404).json({ message: "Invalid id" });
     }
 
-    const user = await UserModel.findById(userId).select("-password");
+    const user = await UserModel.findById(userId)
+      .select("-password")
+      .populate('friends', 'firstName lastName username profilePicture')
+      .populate('groupsJoined', 'name')
+      .populate('groupsCreated', 'name');
+
     if (!user) {
       return res.status(404).json({ message: "No user found" });
     }
 
-    res.status(200).json(user);
+    const friendRequest = await FriendModel.findOne({
+      $or: [
+        { requester: currentUserId, recipient: userId },
+        { requester: userId, recipient: currentUserId }
+      ]
+    });
+
+    const userObj = user.toObject();
+    userObj.friendStatus = friendRequest ? friendRequest.status : "none";
+
+    res.status(200).json(userObj);
   } catch (error) {
     console.log("Error in getSingleUser controller: ", error);
     return res.status(500).json({ message: "Internal server error" });
@@ -152,6 +170,22 @@ export const getCurrentUser = async (req, res) => {
     });
   } catch (error) {
     console.error("Error fetching current user:", error);
+    res.status(500).json({ message: "Internal server error" });
+  }
+};
+
+export const getUserFriends = async (req, res) => {
+  try {
+    const userId = req.loggedInUser._id;
+    const user = await UserModel.findById(userId).populate('friends', 'firstName lastName username profilePicture');
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+
+    res.status(200).json(user.friends);
+  } catch (error) {
+    console.error("Error fetching user's friends:", error);
     res.status(500).json({ message: "Internal server error" });
   }
 };

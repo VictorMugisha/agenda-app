@@ -1,10 +1,23 @@
 import { Box, Text, Button, Flex, Badge } from "@chakra-ui/react";
 import PropTypes from "prop-types";
-import { Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 export default function UserCard({ user, onAddFriend, isLoading = false }) {
+  const navigate = useNavigate();
+
+  const handleCardClick = () => {
+    navigate(`/app/profile/${user._id}`);
+  };
+
   return (
-    <Box p={4} borderWidth={1} borderRadius="md">
+    <Box 
+      p={4} 
+      borderWidth={1} 
+      borderRadius="md" 
+      onClick={handleCardClick}
+      cursor="pointer"
+      _hover={{ backgroundColor: "gray.50" }}
+    >
       <Flex justify="space-between" align="center">
         <Box>
           <Text fontWeight="bold">
@@ -17,24 +30,17 @@ export default function UserCard({ user, onAddFriend, isLoading = false }) {
             <Button
               size="sm"
               colorScheme="blue"
-              onClick={() => onAddFriend(user._id)}
+              onClick={(e) => {
+                e.stopPropagation();
+                onAddFriend(user._id);
+              }}
               isLoading={isLoading}
             >
               Add Friend
             </Button>
           )}
           {user.friendStatus === "pending" && (
-            <>
-              <Badge colorScheme="yellow" mr={2}>Pending</Badge>
-              <Button
-                size="sm"
-                colorScheme="blue"
-                as={Link}
-                to={`/app/profile/${user._id}`}
-              >
-                View
-              </Button>
-            </>
+            <Badge colorScheme="yellow">Pending</Badge>
           )}
           {user.friendStatus === "accepted" && (
             <Badge colorScheme="green">Friends</Badge>
@@ -52,10 +58,7 @@ UserCard.propTypes = {
     lastName: PropTypes.string.isRequired,
     username: PropTypes.string.isRequired,
     friendStatus: PropTypes.oneOf(["none", "pending", "accepted"]).isRequired,
-    friendRequestId: PropTypes.string,
-    isRequester: PropTypes.bool,
   }).isRequired,
   onAddFriend: PropTypes.func.isRequired,
-  onAcceptFriend: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
 };

@@ -48,6 +48,11 @@ const userSchema = new mongoose.Schema(
       ref: "Group",
       default: [],
     },
+    friends: {
+      type: [mongoose.Schema.Types.ObjectId],
+      ref: "User",
+      default: [],
+    },
   },
   { timestamps: true }
 );

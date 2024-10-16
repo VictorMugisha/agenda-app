@@ -104,6 +104,10 @@ export const handleFriendRequest = async (req, res) => {
       friendRequest.status = "accepted";
       await friendRequest.save();
 
+      // Add users to each other's friends list
+      await UserModel.findByIdAndUpdate(userId, { $addToSet: { friends: friendRequest.requester } });
+      await UserModel.findByIdAndUpdate(friendRequest.requester, { $addToSet: { friends: userId } });
+
       // Create a notification for the requester
       const notification = new NotificationModel({
         title: "Friend Request Accepted",
