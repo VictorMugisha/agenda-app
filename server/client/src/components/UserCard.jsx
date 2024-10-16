@@ -1,19 +1,25 @@
-import { Box, Text, Button, Flex, Badge } from "@chakra-ui/react";
+import { Box, Text, Button, Flex, Badge, IconButton } from "@chakra-ui/react";
 import PropTypes from "prop-types";
 import { useNavigate } from "react-router-dom";
+import { FiMessageSquare } from "react-icons/fi";
 
-export default function UserCard({ user, onAddFriend, isLoading = false }) {
+export default function UserCard({ user, onAddFriend, isLoading = false, navigateTo, showChatButton = false }) {
   const navigate = useNavigate();
 
   const handleCardClick = () => {
-    navigate(`/app/profile/${user._id}`);
+    navigate(navigateTo || `/app/profile/${user._id}`);
+  };
+
+  const handleChatClick = (e) => {
+    e.stopPropagation();
+    navigate(`/app/chat/${user._id}`);
   };
 
   return (
-    <Box 
-      p={4} 
-      borderWidth={1} 
-      borderRadius="md" 
+    <Box
+      p={4}
+      borderWidth={1}
+      borderRadius="md"
       onClick={handleCardClick}
       cursor="pointer"
       _hover={{ backgroundColor: "gray.50" }}
@@ -43,7 +49,24 @@ export default function UserCard({ user, onAddFriend, isLoading = false }) {
             <Badge colorScheme="yellow">Pending</Badge>
           )}
           {user.friendStatus === "accepted" && (
-            <Badge colorScheme="green">Friends</Badge>
+            <Badge
+              colorScheme="green"
+              fontSize="sm"
+              px={2}
+              py={1}
+              borderRadius="full"
+            >
+              Friends
+            </Badge>
+          )}
+          {showChatButton && user.friendStatus === "accepted" && (
+            <IconButton
+              icon={<FiMessageSquare />}
+              aria-label="Chat"
+              onClick={handleChatClick}
+              ml={2}
+              colorScheme="blue"
+            />
           )}
         </Flex>
       </Flex>
@@ -61,4 +84,6 @@ UserCard.propTypes = {
   }).isRequired,
   onAddFriend: PropTypes.func.isRequired,
   isLoading: PropTypes.bool,
+  navigateTo: PropTypes.string,
+  showChatButton: PropTypes.bool,
 };

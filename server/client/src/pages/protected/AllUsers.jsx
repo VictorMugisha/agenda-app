@@ -54,6 +54,7 @@ export default function AllUsers() {
               onAddFriend={sendFriendRequest}
               onAcceptFriend={acceptFriendRequest}
               isLoading={loadingUsers[user._id] || false}
+              navigateTo={`/app/profile/${user._id}`}
             />
           ))}
         </VStack>

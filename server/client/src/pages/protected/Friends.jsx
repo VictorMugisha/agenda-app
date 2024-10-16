@@ -44,9 +44,8 @@ export default function Friends() {
               user={{...friend, friendStatus: 'accepted'}}
               onAddFriend={() => {}}
               isLoading={false}
-              onClick={() => {
-                // Navigate to chat room (to be implemented)
-              }}
+              navigateTo={`/app/profile/${friend._id}`}
+              showChatButton={true}
             />
           ))}
         </VStack>
