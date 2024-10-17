@@ -49,24 +49,26 @@ export default function UserCard({ user, onAddFriend, isLoading = false, navigat
             <Badge colorScheme="yellow">Pending</Badge>
           )}
           {user.friendStatus === "accepted" && (
-            <Badge
-              colorScheme="green"
-              fontSize="sm"
-              px={2}
-              py={1}
-              borderRadius="full"
-            >
-              Friends
-            </Badge>
-          )}
-          {showChatButton && user.friendStatus === "accepted" && (
-            <IconButton
-              icon={<FiMessageSquare />}
-              aria-label="Chat"
-              onClick={handleChatClick}
-              ml={2}
-              colorScheme="blue"
-            />
+            <>
+              <Badge
+                colorScheme="green"
+                fontSize="sm"
+                px={2}
+                py={1}
+                borderRadius="full"
+              >
+                Friends
+              </Badge>
+              {showChatButton && (
+                <IconButton
+                  icon={<FiMessageSquare />}
+                  aria-label="Chat"
+                  onClick={handleChatClick}
+                  ml={2}
+                  colorScheme="blue"
+                />
+              )}
+            </>
           )}
         </Flex>
       </Flex>

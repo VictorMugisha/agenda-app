@@ -16,7 +16,7 @@ import protectedRoute from "./middlewares/protect.middleware.js";
 import messageRoutes from "./routes/message.route.js";
 import notificationRoutes from "./routes/notification.route.js";
 import friendRoutes from "./routes/friend.route.js";
-
+import privateMessageRoutes from "./routes/privateMessage.route.js";
 
 import path from "path";
 import { fileURLToPath } from "url";
@@ -64,7 +64,8 @@ app.use("/api/groups", protectedRoute, groupRoutes);
 app.use("/api/request", protectedRoute, requestRoutes);
 app.use("/api/messages", protectedRoute, messageRoutes);
 app.use("/api/notifications", protectedRoute, notificationRoutes);
-app.use("/api/friends", protectedRoute,friendRoutes);
+app.use("/api/friends", protectedRoute, friendRoutes);
+app.use("/api/private-messages", protectedRoute, privateMessageRoutes);
 
 // Serve the frontend client (React app)
 app.use(express.static(path.join(__dirname, "client", "dist")));
