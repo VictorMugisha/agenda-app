@@ -6,6 +6,7 @@ import cors from "cors";
 import cookieParser from "cookie-parser";
 import MessageModel from "./models/message.model.js";
 import GroupModel from "./models/group.model.js";
+import PrivateMessageModel from "./models/privateMessage.model.js";
 
 import connectDB from "./config/db.js";
 import userRoutes from "./routes/user.route.js";
@@ -198,6 +199,28 @@ io.on("connection", (socket) => {
     socket.emit("error", errorMessage);
   });
 
+  socket.on("send_private_message", async ({ content, recipientId, senderId }) => {
+    const sender = socketToUser.get(socket.id);
+    console.log(`User ${sender?.username || "Unknown"} sending private message to ${recipientId}`);
+    try {
+      const newMessage = new PrivateMessageModel({
+        content,
+        sender: senderId,
+        recipient: recipientId,
+      });
+      await newMessage.save();
+      const populatedMessage = await newMessage.populate("sender", "firstName lastName username");
+
+      // Emit the message to both sender and recipient
+      io.to(senderId).to(recipientId).emit("receive_private_message", populatedMessage);
+
+      console.log(`Private message sent by ${sender?.username || "Unknown"} to ${recipientId}`);
+    } catch (error) {
+      console.error(`Error sending private message to ${recipientId}:`, error);
+      socket.emit("error", "Failed to send private message");
+    }
+  });
+  
   socket.on("disconnect", () => {
     const user = socketToUser.get(socket.id);
     if (user) {

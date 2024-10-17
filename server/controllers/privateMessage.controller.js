@@ -1,5 +1,4 @@
 import PrivateMessageModel from "../models/privateMessage.model.js";
-import UserModel from "../models/user.model.js";
 
 export const sendPrivateMessage = async (req, res) => {
   try {
@@ -13,9 +12,15 @@ export const sendPrivateMessage = async (req, res) => {
     });
 
     await newMessage.save();
+    await newMessage.populate("sender", "firstName lastName username");
+
+    // Emit the new message to both sender and recipient
+    const io = req.app.get("io");
+    io.to(senderId).to(recipientId).emit("receive_private_message", newMessage);
 
     res.status(201).json(newMessage);
   } catch (error) {
+    console.error("Error sending private message:", error);
     res
       .status(500)
       .json({ message: "Error sending private message", error: error.message });
@@ -32,7 +37,9 @@ export const getPrivateMessages = async (req, res) => {
         { sender: userId, recipient: friendId },
         { sender: friendId, recipient: userId },
       ],
-    }).sort({ createdAt: 1 });
+    })
+      .sort({ createdAt: 1 })
+      .populate("sender", "firstName lastName username");
 
     res.status(200).json(messages);
   } catch (error) {

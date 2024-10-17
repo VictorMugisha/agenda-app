@@ -73,19 +73,50 @@ export const usePrivateChat = (friendId) => {
   }, [fetchMessages, fetchFriendInfo]);
 
   useEffect(() => {
-    socket.on("private_message", (message) => {
+    socket.on("receive_private_message", (message) => {
       if (message.sender === friendId || message.recipient === friendId) {
         setMessages((prevMessages) => [...prevMessages, message]);
       }
     });
 
     return () => {
-      socket.off("private_message");
+      socket.off("receive_private_message");
     };
   }, [friendId]);
 
+  useEffect(() => {
+    const fetchMessages = async () => {
+      setLoading(true);
+      try {
+        const response = await fetch(`/api/private-messages/${friendId}`, {
+          headers: {
+            Authorization: `Bearer ${getAuthToken()}`,
+          },
+        });
+        if (!response.ok) {
+          throw new Error("Failed to fetch messages");
+        }
+        const data = await response.json();
+        setMessages(data);
+      } catch (err) {
+        setError(err.message);
+        toast({
+          title: "Error",
+          description: "Failed to fetch messages",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchMessages();
+  }, [friendId, toast, setMessages]);
+
   const sendMessage = useCallback(
-    (content) => {
+    async (content) => {
       if (!currentUser) {
         toast({
           title: "Error",
@@ -97,13 +128,44 @@ export const usePrivateChat = (friendId) => {
         return;
       }
 
-      socket.emit("send_private_message", {
-        content,
-        recipientId: friendId,
-        senderId: currentUser._id,
-      });
+      try {
+        const response = await fetch("/api/private-messages/send", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${getAuthToken()}`,
+          },
+          body: JSON.stringify({
+            recipientId: friendId,
+            content,
+          }),
+        });
+
+        const responseData = await response.json();
+
+        if (!response.ok) {
+          throw new Error(responseData.message || "Failed to send message");
+        }
+
+        setMessages((prevMessages) => [...prevMessages, responseData]);
+
+        socket.emit("send_private_message", {
+          content,
+          recipientId: friendId,
+          senderId: currentUser._id,
+        });
+      } catch (err) {
+        console.error("Error sending message:", err);
+        toast({
+          title: "Error",
+          description: "Failed to send message. Please try again.",
+          status: "error",
+          duration: 3000,
+          isClosable: true,
+        });
+      }
     },
-    [currentUser, friendId, toast]
+    [currentUser, friendId, toast, setMessages]
   );
 
   const markAsRead = useCallback(async (messageId) => {
