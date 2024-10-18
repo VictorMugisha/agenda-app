@@ -22,15 +22,12 @@ export const sendPrivateMessage = async (req, res) => {
     await newMessage.save();
     await newMessage.populate("sender", "firstName lastName username");
 
-    // Use the globally attached io instance
-    const io = req.app.io;
+    const io = req.app.get("io");
     if (!io) {
       console.error('Socket.io instance not found on req.app');
-      console.log('req.app keys:', Object.keys(req.app));
     } else {
       console.log(`Emitting receive_private_message to ${senderId} and ${recipientId}`);
-      io.to(senderId.toString()).emit("receive_private_message", newMessage);
-      io.to(recipientId.toString()).emit("receive_private_message", newMessage);
+      io.to(senderId.toString()).to(recipientId.toString()).emit("receive_private_message", newMessage);
     }
 
     res.status(201).json(newMessage);

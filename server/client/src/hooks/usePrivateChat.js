@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useCurrentUser } from "./useCurrentUser";
 import { useToast } from "@chakra-ui/react";
 import socket from "../socket";
@@ -11,6 +11,7 @@ export const usePrivateChat = (friendId) => {
   const [friendInfo, setFriendInfo] = useState(null);
   const { currentUser } = useCurrentUser();
   const toast = useToast();
+  const pendingMessages = useRef(new Set());
 
   const fetchMessages = useCallback(async () => {
     try {
@@ -77,7 +78,17 @@ export const usePrivateChat = (friendId) => {
 
     const handleReceiveMessage = (message) => {
       console.log("Received private message:", message);
-      setMessages((prevMessages) => [...prevMessages, message]);
+      setMessages((prevMessages) => {
+        if (pendingMessages.current.has(message._id)) {
+          pendingMessages.current.delete(message._id);
+          return prevMessages.map(msg => 
+            msg._id === message._id ? message : msg
+          );
+        } else if (!prevMessages.some(m => m._id === message._id)) {
+          return [...prevMessages, message];
+        }
+        return prevMessages;
+      });
     };
 
     socket.on("receive_private_message", handleReceiveMessage);
@@ -105,8 +116,26 @@ export const usePrivateChat = (friendId) => {
         return;
       }
 
+      const tempId = `temp-${Date.now()}`;
+      const optimisticMessage = {
+        _id: tempId,
+        content,
+        sender: {
+          _id: currentUser._id,
+          firstName: currentUser.firstName,
+          lastName: currentUser.lastName,
+          username: currentUser.username
+        },
+        recipient: friendId,
+        createdAt: new Date().toISOString()
+      };
+
       try {
         console.log("Sending private message:", content);
+        
+        setMessages(prevMessages => [...prevMessages, optimisticMessage]);
+        pendingMessages.current.add(tempId);
+
         const response = await fetch("/api/private-messages/send", {
           method: "POST",
           headers: {
@@ -126,11 +155,21 @@ export const usePrivateChat = (friendId) => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
-        // Add the new message to the state immediately
-        setMessages((prevMessages) => [...prevMessages, responseData]);
+        pendingMessages.current.delete(tempId);
+        pendingMessages.current.add(responseData._id);
+
+        setMessages(prevMessages => 
+          prevMessages.map(msg => 
+            msg._id === tempId ? { ...responseData, _id: responseData._id } : msg
+          )
+        );
 
       } catch (err) {
         console.error("Error sending private message:", err);
+        pendingMessages.current.delete(tempId);
+        setMessages(prevMessages => 
+          prevMessages.filter(msg => msg._id !== tempId)
+        );
         toast({
           title: "Error",
           description: "Failed to send message. Please try again.",
