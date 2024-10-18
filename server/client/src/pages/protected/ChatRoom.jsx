@@ -23,8 +23,7 @@ export default function ChatRoom() {
 
   useEffect(() => {
     if (chatContainerRef.current) {
-      chatContainerRef.current.scrollTop =
-        chatContainerRef.current.scrollHeight;
+      chatContainerRef.current.scrollTop = chatContainerRef.current.scrollHeight;
     }
   }, [messages]);
 
@@ -61,14 +60,14 @@ export default function ChatRoom() {
           <HStack
             key={message._id}
             alignSelf={
-              message.sender === currentUser._id ? "flex-end" : "flex-start"
+              message.sender._id === currentUser._id ? "flex-end" : "flex-start"
             }
           >
-            {message.sender !== currentUser._id && (
-              <Avatar size="sm" name="Friend" />
+            {message.sender._id !== currentUser._id && (
+              <Avatar size="sm" name={`${message.sender.firstName} ${message.sender.lastName}`} />
             )}
             <Box
-              bg={message.sender === currentUser._id ? "blue.100" : "gray.100"}
+              bg={message.sender._id === currentUser._id ? "blue.100" : "gray.100"}
               p={2}
               borderRadius="md"
             >

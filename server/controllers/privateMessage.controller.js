@@ -5,25 +5,41 @@ export const sendPrivateMessage = async (req, res) => {
     const { recipientId, content } = req.body;
     const senderId = req.loggedInUser._id;
 
+    console.log('From sendPrivateMessage: Sender ID:', senderId);
+    console.log('From sendPrivateMessage: Recipient ID:', recipientId);
+    console.log('From sendPrivateMessage: Content:', content);
+
+    if (!senderId || !recipientId || !content) {
+      return res.status(400).json({ message: "Missing required fields" });
+    }
+
     const newMessage = new PrivateMessageModel({
       sender: senderId,
       recipient: recipientId,
       content,
     });
 
+    console.log('New message object:', newMessage);
+
     await newMessage.save();
+    console.log('Message saved to database');
+
     await newMessage.populate("sender", "firstName lastName username");
+    console.log('Populated message:', newMessage);
 
     // Emit the new message to both sender and recipient
     const io = req.app.get("io");
-    io.to(senderId).to(recipientId).emit("receive_private_message", newMessage);
+    if (!io) {
+      console.error('Socket.io instance not found on req.app');
+    } else {
+      io.to(senderId.toString()).to(recipientId).emit("receive_private_message", newMessage);
+      console.log('Message emitted via Socket.io');
+    }
 
     res.status(201).json(newMessage);
   } catch (error) {
-    console.error("Error sending private message:", error);
-    res
-      .status(500)
-      .json({ message: "Error sending private message", error: error.message });
+    console.error("Error in sendPrivateMessage:", error);
+    res.status(500).json({ message: "Error sending private message", error: error.message, stack: error.stack });
   }
 };
 

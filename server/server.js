@@ -76,6 +76,7 @@ app.get("*", (req, res) => {
 });
 
 const socketToUser = new Map();
+app.set("io", io);
 
 io.on("connection", (socket) => {
   console.log(`New socket connection: ${socket.id}`);
@@ -212,7 +213,8 @@ io.on("connection", (socket) => {
       const populatedMessage = await newMessage.populate("sender", "firstName lastName username");
 
       // Emit the message to both sender and recipient
-      io.to(senderId).to(recipientId).emit("receive_private_message", populatedMessage);
+      io.to(senderId).emit("receive_private_message", populatedMessage);
+      io.to(recipientId).emit("receive_private_message", populatedMessage);
 
       console.log(`Private message sent by ${sender?.username || "Unknown"} to ${recipientId}`);
     } catch (error) {

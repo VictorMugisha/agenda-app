@@ -73,47 +73,19 @@ export const usePrivateChat = (friendId) => {
   }, [fetchMessages, fetchFriendInfo]);
 
   useEffect(() => {
-    socket.on("receive_private_message", (message) => {
-      if (message.sender === friendId || message.recipient === friendId) {
+    const handleReceiveMessage = (message) => {
+      console.log("Received message:", message);
+      if (message.sender._id === friendId || message.recipient === friendId) {
         setMessages((prevMessages) => [...prevMessages, message]);
       }
-    });
+    };
+
+    socket.on("receive_private_message", handleReceiveMessage);
 
     return () => {
-      socket.off("receive_private_message");
+      socket.off("receive_private_message", handleReceiveMessage);
     };
   }, [friendId]);
-
-  useEffect(() => {
-    const fetchMessages = async () => {
-      setLoading(true);
-      try {
-        const response = await fetch(`/api/private-messages/${friendId}`, {
-          headers: {
-            Authorization: `Bearer ${getAuthToken()}`,
-          },
-        });
-        if (!response.ok) {
-          throw new Error("Failed to fetch messages");
-        }
-        const data = await response.json();
-        setMessages(data);
-      } catch (err) {
-        setError(err.message);
-        toast({
-          title: "Error",
-          description: "Failed to fetch messages",
-          status: "error",
-          duration: 3000,
-          isClosable: true,
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-
-    fetchMessages();
-  }, [friendId, toast, setMessages]);
 
   const sendMessage = useCallback(
     async (content) => {
@@ -142,18 +114,15 @@ export const usePrivateChat = (friendId) => {
         });
 
         const responseData = await response.json();
+        console.log('Server response:', responseData);
 
         if (!response.ok) {
-          throw new Error(responseData.message || "Failed to send message");
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
 
         setMessages((prevMessages) => [...prevMessages, responseData]);
 
-        socket.emit("send_private_message", {
-          content,
-          recipientId: friendId,
-          senderId: currentUser._id,
-        });
+        // We don't need to emit the message here, as the server is already doing it
       } catch (err) {
         console.error("Error sending message:", err);
         toast({
@@ -165,38 +134,15 @@ export const usePrivateChat = (friendId) => {
         });
       }
     },
-    [currentUser, friendId, toast, setMessages]
+    [currentUser, friendId, toast]
   );
-
-  const markAsRead = useCallback(async (messageId) => {
-    try {
-      const response = await fetch(`/api/private-messages/${messageId}/read`, {
-        method: "PUT",
-        headers: {
-          Authorization: `Bearer ${getAuthToken()}`,
-        },
-      });
-
-      if (!response.ok) {
-        throw new Error("Failed to mark message as read");
-      }
-
-      setMessages((prevMessages) =>
-        prevMessages.map((msg) =>
-          msg._id === messageId ? { ...msg, read: true } : msg
-        )
-      );
-    } catch (err) {
-      console.error("Error marking message as read:", err);
-    }
-  }, []);
 
   return {
     messages,
     loading,
     error,
     sendMessage,
-    markAsRead,
     friendInfo,
+    setMessages,
   };
 };
