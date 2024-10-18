@@ -19,27 +19,24 @@ export const sendPrivateMessage = async (req, res) => {
       content,
     });
 
-    console.log('New message object:', newMessage);
-
     await newMessage.save();
-    console.log('Message saved to database');
-
     await newMessage.populate("sender", "firstName lastName username");
-    console.log('Populated message:', newMessage);
 
-    // Emit the new message to both sender and recipient
-    const io = req.app.get("io");
+    // Use the globally attached io instance
+    const io = req.app.io;
     if (!io) {
       console.error('Socket.io instance not found on req.app');
+      console.log('req.app keys:', Object.keys(req.app));
     } else {
-      io.to(senderId.toString()).to(recipientId).emit("receive_private_message", newMessage);
-      console.log('Message emitted via Socket.io');
+      console.log(`Emitting receive_private_message to ${senderId} and ${recipientId}`);
+      io.to(senderId.toString()).emit("receive_private_message", newMessage);
+      io.to(recipientId.toString()).emit("receive_private_message", newMessage);
     }
 
     res.status(201).json(newMessage);
   } catch (error) {
     console.error("Error in sendPrivateMessage:", error);
-    res.status(500).json({ message: "Error sending private message", error: error.message, stack: error.stack });
+    res.status(500).json({ message: "Error sending private message", error: error.message });
   }
 };
 

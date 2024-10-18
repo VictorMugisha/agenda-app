@@ -68,31 +68,36 @@ export const usePrivateChat = (friendId) => {
   }, [friendId, toast]);
 
   useEffect(() => {
-    fetchMessages();
-    fetchFriendInfo();
-  }, [fetchMessages, fetchFriendInfo]);
+    if (!currentUser || !friendId) return;
 
-  useEffect(() => {
+    socket.connect();
+
+    console.log(`Joining private chat room for ${currentUser._id} and ${friendId}`);
+    socket.emit("join_private_chat", { userId: currentUser._id, friendId });
+
     const handleReceiveMessage = (message) => {
-      console.log("Received message:", message);
-      if (message.sender._id === friendId || message.recipient === friendId) {
-        setMessages((prevMessages) => [...prevMessages, message]);
-      }
+      console.log("Received private message:", message);
+      setMessages((prevMessages) => [...prevMessages, message]);
     };
 
     socket.on("receive_private_message", handleReceiveMessage);
 
+    fetchMessages();
+    fetchFriendInfo();
+
     return () => {
+      console.log("Cleaning up private chat...");
       socket.off("receive_private_message", handleReceiveMessage);
+      socket.emit("leave_private_chat", { userId: currentUser._id, friendId });
     };
-  }, [friendId]);
+  }, [currentUser, friendId, fetchMessages, fetchFriendInfo]);
 
   const sendMessage = useCallback(
     async (content) => {
-      if (!currentUser) {
+      if (!currentUser || !currentUser._id) {
         toast({
           title: "Error",
-          description: "User not authenticated",
+          description: "User not authenticated or user ID is missing",
           status: "error",
           duration: 3000,
           isClosable: true,
@@ -101,6 +106,7 @@ export const usePrivateChat = (friendId) => {
       }
 
       try {
+        console.log("Sending private message:", content);
         const response = await fetch("/api/private-messages/send", {
           method: "POST",
           headers: {
@@ -120,11 +126,11 @@ export const usePrivateChat = (friendId) => {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
 
+        // Add the new message to the state immediately
         setMessages((prevMessages) => [...prevMessages, responseData]);
 
-        // We don't need to emit the message here, as the server is already doing it
       } catch (err) {
-        console.error("Error sending message:", err);
+        console.error("Error sending private message:", err);
         toast({
           title: "Error",
           description: "Failed to send message. Please try again.",

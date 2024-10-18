@@ -44,6 +44,10 @@ const io = new Server(server, {
   },
 });
 
+// Instead of app.set('io', io), let's attach io directly to the app object
+// app.io = io;
+app.set("io", io);
+
 app.use(cookieParser());
 app.use(express.json());
 app.use(
@@ -76,76 +80,114 @@ app.get("*", (req, res) => {
 });
 
 const socketToUser = new Map();
-app.set("io", io);
 
 io.on("connection", (socket) => {
   console.log(`New socket connection: ${socket.id}`);
 
   socket.on("register_user", ({ userId, username }) => {
     socketToUser.set(socket.id, { userId, username });
-    console.log(`User ${username} (${userId}) connected with socket ${socket.id}`);
+    console.log(
+      `User ${username} (${userId}) connected with socket ${socket.id}`
+    );
   });
 
   socket.on("join_group", async (groupId) => {
     const user = socketToUser.get(socket.id);
-    const group = await GroupModel.findById(groupId).select('name').lean();
-    console.log(`User ${user?.username || 'Unknown'} (Socket ${socket.id}) joining group ${group?.name || 'Unknown'} (${groupId})`);
+    const group = await GroupModel.findById(groupId).select("name").lean();
+    console.log(
+      `User ${user?.username || "Unknown"} (Socket ${
+        socket.id
+      }) joining group ${group?.name || "Unknown"} (${groupId})`
+    );
     socket.join(groupId);
   });
 
   socket.on("leave_group", async (groupId) => {
     const user = socketToUser.get(socket.id);
-    const group = await GroupModel.findById(groupId).select('name').lean();
-    console.log(`User ${user?.username || 'Unknown'} (Socket ${socket.id}) leaving group ${group?.name || 'Unknown'} (${groupId})`);
+    const group = await GroupModel.findById(groupId).select("name").lean();
+    console.log(
+      `User ${user?.username || "Unknown"} (Socket ${
+        socket.id
+      }) leaving group ${group?.name || "Unknown"} (${groupId})`
+    );
     socket.leave(groupId);
   });
 
   socket.on("fetch_group_details", async (groupId) => {
     const user = socketToUser.get(socket.id);
-    console.log(`User ${user?.username || 'Unknown'} fetching details for group ${groupId}`);
+    console.log(
+      `User ${
+        user?.username || "Unknown"
+      } fetching details for group ${groupId}`
+    );
     try {
-      const group = await GroupModel.findById(groupId).select('name members').lean();
+      const group = await GroupModel.findById(groupId)
+        .select("name members")
+        .lean();
       if (!group) {
         console.log(`Group ${groupId} not found`);
-        socket.emit('error', 'Group not found');
+        socket.emit("error", "Group not found");
       } else {
-        console.log(`Emitting group details for ${group.name} (${groupId}) to ${user?.username || 'Unknown'}`);
-        socket.emit('group_details', group);
+        console.log(
+          `Emitting group details for ${group.name} (${groupId}) to ${
+            user?.username || "Unknown"
+          }`
+        );
+        socket.emit("group_details", group);
       }
     } catch (error) {
       console.error(`Error fetching group details for ${groupId}:`, error);
-      socket.emit('error', 'Failed to fetch group details');
+      socket.emit("error", "Failed to fetch group details");
     }
   });
 
   socket.on("fetch_messages", async ({ groupId, page, limit }) => {
     const user = socketToUser.get(socket.id);
-    const group = await GroupModel.findById(groupId).select('name').lean();
-    console.log(`User ${user?.username || 'Unknown'} fetching messages for group ${group?.name || 'Unknown'} (${groupId}), page ${page}`);
+    const group = await GroupModel.findById(groupId).select("name").lean();
+    console.log(
+      `User ${user?.username || "Unknown"} fetching messages for group ${
+        group?.name || "Unknown"
+      } (${groupId}), page ${page}`
+    );
     try {
       const skip = (page - 1) * limit;
       const messages = await MessageModel.find({ group: groupId })
         .sort({ createdAt: -1 })
         .skip(skip)
         .limit(limit)
-        .populate('sender', 'firstName lastName username')
+        .populate("sender", "firstName lastName username")
         .lean();
 
-      const totalMessages = await MessageModel.countDocuments({ group: groupId });
+      const totalMessages = await MessageModel.countDocuments({
+        group: groupId,
+      });
       const hasMore = totalMessages > skip + messages.length;
 
-      console.log(`Emitting ${messages.length} messages to ${user?.username || 'Unknown'} for group ${group?.name || 'Unknown'}`);
-      socket.emit('messages', { messages: messages.reverse(), hasMore });
+      console.log(
+        `Emitting ${messages.length} messages to ${
+          user?.username || "Unknown"
+        } for group ${group?.name || "Unknown"}`
+      );
+      socket.emit("messages", { messages: messages.reverse(), hasMore });
     } catch (error) {
-      console.error(`Error fetching messages for group ${group?.name || 'Unknown'} (${groupId}):`, error);
-      socket.emit('error', 'Failed to fetch messages');
+      console.error(
+        `Error fetching messages for group ${
+          group?.name || "Unknown"
+        } (${groupId}):`,
+        error
+      );
+      socket.emit("error", "Failed to fetch messages");
     }
   });
 
   socket.on("send_message", async ({ content, groupId, senderId }) => {
     const user = socketToUser.get(socket.id);
-    const group = await GroupModel.findById(groupId).select('name').lean();
-    console.log(`User ${user?.username || 'Unknown'} sending message to group ${group?.name || 'Unknown'} (${groupId})`);
+    const group = await GroupModel.findById(groupId).select("name").lean();
+    console.log(
+      `User ${user?.username || "Unknown"} sending message to group ${
+        group?.name || "Unknown"
+      } (${groupId})`
+    );
     try {
       const newMessage = new MessageModel({
         content,
@@ -153,12 +195,24 @@ io.on("connection", (socket) => {
         group: groupId,
       });
       await newMessage.save();
-      const populatedMessage = await newMessage.populate('sender', 'firstName lastName username');
-      console.log(`New message sent by ${user?.username || 'Unknown'} to group ${group?.name || 'Unknown'} (${groupId})`);
-      io.to(groupId).emit('receive_message', populatedMessage);
+      const populatedMessage = await newMessage.populate(
+        "sender",
+        "firstName lastName username"
+      );
+      console.log(
+        `New message sent by ${user?.username || "Unknown"} to group ${
+          group?.name || "Unknown"
+        } (${groupId})`
+      );
+      io.to(groupId).emit("receive_message", populatedMessage);
     } catch (error) {
-      console.error(`Error sending message to group ${group?.name || 'Unknown'} (${groupId}):`, error);
-      socket.emit('error', 'Failed to send message');
+      console.error(
+        `Error sending message to group ${
+          group?.name || "Unknown"
+        } (${groupId}):`,
+        error
+      );
+      socket.emit("error", "Failed to send message");
     }
   });
 
@@ -170,7 +224,11 @@ io.on("connection", (socket) => {
         { $addToSet: { readBy: userId } },
         { new: true }
       );
-      console.log(`Message ${messageId} marked as read by ${user?.username || 'Unknown'} in group ${groupId}`);
+      console.log(
+        `Message ${messageId} marked as read by ${
+          user?.username || "Unknown"
+        } in group ${groupId}`
+      );
       io.to(groupId).emit("message_read", { messageId, userId });
     } catch (error) {
       console.error(`Error marking message as read: ${error}`);
@@ -186,7 +244,11 @@ io.on("connection", (socket) => {
         { $addToSet: { readBy: userId } }
       );
       const updatedMessages = await MessageModel.find({ group: groupId });
-      console.log(`All messages marked as read by ${user?.username || 'Unknown'} in group ${groupId}`);
+      console.log(
+        `All messages marked as read by ${
+          user?.username || "Unknown"
+        } in group ${groupId}`
+      );
       io.to(groupId).emit("messages", updatedMessages);
     } catch (error) {
       console.error(`Error marking all messages as read: ${error}`);
@@ -196,33 +258,61 @@ io.on("connection", (socket) => {
 
   socket.on("error", (errorMessage) => {
     const user = socketToUser.get(socket.id);
-    console.error(`Error for user ${user?.username || 'Unknown'}: ${errorMessage}`);
+    console.error(
+      `Error for user ${user?.username || "Unknown"}: ${errorMessage}`
+    );
     socket.emit("error", errorMessage);
   });
 
-  socket.on("send_private_message", async ({ content, recipientId, senderId }) => {
-    const sender = socketToUser.get(socket.id);
-    console.log(`User ${sender?.username || "Unknown"} sending private message to ${recipientId}`);
-    try {
-      const newMessage = new PrivateMessageModel({
-        content,
-        sender: senderId,
-        recipient: recipientId,
-      });
-      await newMessage.save();
-      const populatedMessage = await newMessage.populate("sender", "firstName lastName username");
-
-      // Emit the message to both sender and recipient
-      io.to(senderId).emit("receive_private_message", populatedMessage);
-      io.to(recipientId).emit("receive_private_message", populatedMessage);
-
-      console.log(`Private message sent by ${sender?.username || "Unknown"} to ${recipientId}`);
-    } catch (error) {
-      console.error(`Error sending private message to ${recipientId}:`, error);
-      socket.emit("error", "Failed to send private message");
-    }
+  socket.on("join_private_chat", ({ userId, friendId }) => {
+    console.log(`User ${userId} joining private chat with ${friendId}`);
+    socket.join(userId.toString());
+    socket.join(friendId.toString());
   });
-  
+
+  socket.on("leave_private_chat", ({ userId, friendId }) => {
+    console.log(`User ${userId} leaving private chat with ${friendId}`);
+    socket.leave(userId.toString());
+    socket.leave(friendId.toString());
+  });
+
+  socket.on(
+    "send_private_message",
+    async ({ content, recipientId, senderId }) => {
+      console.log(
+        `Received send_private_message event: ${senderId} -> ${recipientId}`
+      );
+      try {
+        const newMessage = new PrivateMessageModel({
+          content,
+          sender: senderId,
+          recipient: recipientId,
+        });
+        await newMessage.save();
+        const populatedMessage = await newMessage.populate(
+          "sender",
+          "firstName lastName username"
+        );
+
+        console.log(
+          `Emitting receive_private_message to ${senderId} and ${recipientId}`
+        );
+        io.to(senderId.toString()).emit(
+          "receive_private_message",
+          populatedMessage
+        );
+        io.to(recipientId.toString()).emit(
+          "receive_private_message",
+          populatedMessage
+        );
+        console.log("Message emitted via Socket.io");
+      } catch (error) {
+        console.error(`Error sending private message:`, error);
+        socket.emit("error", "Failed to send private message");
+      }
+    }
+  );
+
   socket.on("disconnect", () => {
     const user = socketToUser.get(socket.id);
     if (user) {
@@ -237,3 +327,5 @@ io.on("connection", (socket) => {
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
+
+export { app, io };
